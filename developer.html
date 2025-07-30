@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Developer - DeenFlix</title>
+  <style>
+    /* বেসিক স্টাইল */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      color: #1c1c1c;
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark-mode {
+      background-color: #121212;
+      color: #f1f1f1;
+    }
+    
+    /* হেডার স্টাইল */
+    header {
+      background: linear-gradient(to right, #004d40, #00796b);
+      color: #fff;
+      padding: 0.8rem 1rem;
+      text-align: center;
+      min-height: 45px; 
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 1.8rem;
+    }
+    header a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 0.5rem 1rem;
+      border: 1px solid white;
+      border-radius: 5px;
+      transition: background-color 0.2s, color 0.2s;
+    }
+    header a:hover {
+        background-color: white;
+        color: #004d40;
+    }
+
+    /* ডেভেলপার কার্ড */
+    .container {
+      max-width: 800px;
+      margin: 3rem auto;
+      padding: 2rem;
+      text-align: center;
+    }
+    .developer-card {
+      background-color: #fff;
+      border-radius: 15px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      padding: 2rem;
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+    body.dark-mode .developer-card {
+      background-color: #1e1e1e;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+    }
+    
+    .profile-pic {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid #00796b;
+      margin-bottom: 1rem;
+    }
+    
+    .developer-name {
+      font-size: 2rem;
+      font-weight: 600;
+      margin: 0;
+    }
+    .developer-name a {
+        text-decoration: none;
+        color: inherit;
+        transition: color 0.2s;
+    }
+    .developer-name a:hover {
+        color: #00796b;
+    }
+    body.dark-mode .developer-name a:hover {
+        color: #00bfa5;
+    }
+
+    .developer-title {
+      font-size: 1.1rem;
+      color: #00796b;
+      margin: 0.5rem 0 1.5rem 0;
+      font-style: italic; /* উক্তিটিকে একটু ভিন্ন স্টাইল দেওয়া হলো */
+    }
+    
+    .bio {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 2rem;
+    }
+    body.dark-mode .bio {
+        color: #ccc;
+    }
+
+    /* সোশ্যাল লিঙ্ক */
+    .social-links a {
+        color: #004d40;
+        text-decoration: none;
+        font-size: 1.8rem;
+        margin: 0 15px;
+        transition: color 0.2s;
+    }
+    body.dark-mode .social-links a {
+        color: #00bfa5;
+    }
+    .social-links a:hover {
+        color: #00bfa5;
+    }
+    body.dark-mode .social-links a:hover {
+        color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>About The Developer</h1>
+    <a href="home.html">হোম পেজে ফিরুন</a>
+  </header>
+  
+  <div class="container">
+    <div class="developer-card">
+      <img src="dimage.png" alt="Developer's Photo" class="profile-pic">
+      
+      <h2 class="developer-name">
+        <a href="https://www.facebook.com/share/16powf36eb/" target="_blank" rel="noopener noreferrer">Faruk Ahmed</a>
+      </h2>
+      
+      <p class="developer-title">"প্রযুক্তির আলোয় দ্বীনের সৌন্দর্য ছড়িয়ে দেওয়ার একটি ক্ষুদ্র প্রয়াস।"</p>
+      
+      <p class="bio">
+        আমি একজন আগ্রহী ওয়েব ডেভেলপার, যিনি পরিচ্ছন্ন, আধুনিক এবং ব্যবহারকারী-বান্ধব ওয়েব অ্যাপ্লিকেশন তৈরিতে বিশ্বাসী। DeenFlix প্রকল্পটি ইসলামিক জ্ঞানকে একটি সুন্দর এবং সহজলভ্য প্ল্যাটফর্মে পৌঁছে দেওয়ার একটি প্রচেষ্টা।
+      </p>
+      
+      <div class="social-links">
+        <a href="#" target="_blank" title="GitHub">G</a>
+        <a href="#" target="_blank" title="LinkedIn">L</a>
+        <a href="#" target="_blank" title="Twitter">T</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+    }
+  </script>
+</body>
+</html>
