@@ -8,60 +8,20 @@
   <style>
     /* CSS অপরিবর্তিত আছে */
     body{margin:0;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background-color:#f8f9fa;color:#1c1c1c;transition:background-color .3s,color .3s}body.dark-mode{background-color:#121212;color:#f1f1f1}header{background:linear-gradient(to right,#004d40,#00796b);color:#fff;padding:.8rem 1rem;text-align:center;min-height:45px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1002}#menu-icon{width:28px;height:28px;cursor:pointer;fill:#fff;display:none;z-index:1001}header h1{margin:0;font-size:1.8rem;font-weight:600;border-right:2px solid rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;animation:blink-caret .75s step-end infinite;position:absolute;left:50%;transform:translateX(-50%)}@keyframes blink-caret{from,to{border-color:transparent}50%{border-color:rgba(255,255,255,.75)}}nav{display:flex;justify-content:center;background:#004d40;padding:.5rem}nav a{color:#fff;margin:.2rem .3rem;text-decoration:none;font-weight:700;font-size:.9rem;padding:.5rem .8rem;border-radius:5px;transition:transform .1s ease-in-out,background-color .2s}nav a:hover{text-decoration:underline}nav a:active{transform:scale(.95);background-color:rgba(255,255,255,.1)}#theme-toggle{cursor:pointer;width:24px;height:24px}#theme-toggle .sun-icon,#theme-toggle .moon-icon{width:100%;height:100%;fill:#fff}.moon-icon{display:none}body.dark-mode .sun-icon{display:none}body.dark-mode .moon-icon{display:block}main{padding:1.5rem; min-height: calc(100vh - 250px);}footer{text-align:center;padding:1.5rem;background-color:#e9ecef;margin-top:2rem}body.dark-mode footer{background-color:#1c1c1c}
-
     .video-section-container{margin-bottom:2.5rem}.title-container{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #00796b;margin-bottom:1.5rem}body.dark-mode .title-container{border-bottom-color:#00a98f}.category-title{font-size:1.8rem;font-weight:700;color:#004d40;padding-bottom:.5rem;margin-bottom:0;border-bottom:none}body.dark-mode .category-title{color:#b2dfdb}#refresh-button{width:28px;height:28px;cursor:pointer;fill:#004d40;transition:transform .3s ease}#refresh-button:hover{transform:rotate(90deg)}body.dark-mode #refresh-button{fill:#b2dfdb}
-    .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.8rem} 
-
+    .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.8rem}
     .video-card{border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.1);background-color:#fff;transition:transform .3s,box-shadow .3s;display:flex;flex-direction:column}body.dark-mode .video-card{background-color:#2c2c2c;box-shadow:0 4px 12px rgba(0,0,0,.3)}.video-card:hover:not(.is-loading){transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,.15)}
-
-    .skeleton {
-        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-        background-size: 200% 100%;
-        animation: skeleton-shine 1.5s linear infinite;
-        border-radius: 4px;
-    }
-    body.dark-mode .skeleton {
-        background: linear-gradient(90deg, #3a3a3a 25%, #444 50%, #3a3a3a 75%);
-        background-size: 200% 100%;
-    }
-    @keyframes skeleton-shine {
-        to { background-position: -200% 0; }
-    }
-    .video-card.is-loading .skeleton-image {
-        padding-top: 56.25%;
-        width: 100%;
-        height: 0;
-    }
-    .video-card.is-loading .skeleton-content {
-        padding: 1rem;
-    }
-    .video-card.is-loading .skeleton-title {
-        height: 24px;
-        width: 80%;
-        margin-bottom: .5rem;
-    }
-    .video-card.is-loading .skeleton-subtitle {
-        height: 16px;
-        width: 60%;
-        margin-bottom: 1rem;
-    }
-    .video-card.is-loading .skeleton-reactions {
-        display: flex;
-        justify-content: space-around;
-    }
-    .video-card.is-loading .skeleton-circle {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-    }
-    .video-card .real-content {
-        opacity: 0;
-        transition: opacity 0.4s ease-in-out;
-    }
-    .video-card:not(.is-loading) .real-content {
-        opacity: 1;
-    }
-
+    .skeleton {background:linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);background-size:200% 100%;animation:skeleton-shine 1.5s linear infinite;border-radius:4px}
+    body.dark-mode .skeleton {background:linear-gradient(90deg, #3a3a3a 25%, #444 50%, #3a3a3a 75%);background-size:200% 100%}
+    @keyframes skeleton-shine { to { background-position: -200% 0; } }
+    .video-card.is-loading .skeleton-image {padding-top:56.25%;width:100%;height:0}
+    .video-card.is-loading .skeleton-content {padding:1rem}
+    .video-card.is-loading .skeleton-title {height:24px;width:80%;margin-bottom:.5rem}
+    .video-card.is-loading .skeleton-subtitle {height:16px;width:60%;margin-bottom:1rem}
+    .video-card.is-loading .skeleton-reactions {display:flex;justify-content:space-around}
+    .video-card.is-loading .skeleton-circle {width:40px;height:40px;border-radius:50%}
+    .video-card .real-content {opacity:0;transition:opacity .4s ease-in-out}
+    .video-card:not(.is-loading) .real-content {opacity:1}
     .thumbnail-container {position:relative;background-color:#000;cursor:pointer;width:100%;padding-top:56.25%;height:0}
     .thumbnail-container img {position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border:none;transition:opacity .2s}
     .thumbnail-container:hover img{opacity:.85}
@@ -74,7 +34,6 @@
     body.dark-mode .video-title{color:#eee}
     .reaction-section{display:flex;justify-content:space-around;align-items:center}.reaction-item{display:flex;flex-direction:column;align-items:center;gap:.2rem;cursor:pointer}.react-btn{background:0 0;border:none;padding:0;font-size:1.2rem;line-height:1;transition:transform .2s ease-in-out,opacity .2s;opacity:.5}.react-btn.reacted{opacity:1;transform:scale(1.2)}.reaction-text{font-weight:600;font-size:.75rem;line-height:1}.reaction-count{font-size:.7rem}.empty-category-message{padding:1rem;text-align:center;background-color:#e0f2f1;border-radius:5px;color:#004d40;grid-column:1 / -1}body.dark-mode .empty-category-message{background-color:#1a3c38;color:#a7c4c1}
     #loading-spinner{text-align:center;padding:1rem;display:none}.spinner{border:4px solid rgba(0,0,0,.1);width:36px;height:36px;border-radius:50%;border-left-color:#00796b;animation:spin 1s ease infinite}@keyframes spin{to{transform:rotate(360deg)}}
-
     @media (max-width:768px){#menu-icon{display:block}header h1{font-size:1.5rem}nav{position:fixed;top:0;left:0;width:auto;height:100vh;background:#004d40;box-shadow:2px 0 5px rgba(0,0,0,.2);flex-direction:column;justify-content:flex-start;padding:80px 1.5rem 0 1.5rem;transform:translateX(-100%);transition:transform .3s ease-in-out;z-index:1000}nav.nav-open{transform:translateX(0)}nav a{text-align:left;font-size:1rem;white-space:nowrap;width:auto;margin:0 0 10px;padding:.8rem 1.5rem;border-radius:8px;background:rgba(0,0,0,.15);opacity:0;transform:translateY(-15px);transition:opacity .3s ease-out,transform .3s ease-out}nav.nav-open a{opacity:1;transform:translateY(0)}nav.nav-open a:nth-child(1){transition-delay:.15s}nav.nav-open a:nth-child(2){transition-delay:.2s}nav.nav-open a:nth-child(3){transition-delay:.25s}nav.nav-open a:nth-child(4){transition-delay:.3s}nav.nav-open a:nth-child(5){transition-delay:.35s}nav.nav-open a:nth-child(6){transition-delay:.4s}}
   </style>
 </head>
@@ -94,105 +53,97 @@
     // Firebase Config and initial setup
     const firebaseConfig={apiKey:"AIzaSyBSzGX7miRjrBJAk339LpQDVZ-yfOMnA-E",authDomain:"deenflix-53217.firebaseapp.com",databaseURL:"https://deenflix-53217-default-rtdb.firebaseio.com",projectId:"deenflix-53217",storageBucket:"deenflix-53217.firebasestorage.app",messagingSenderId:"577532998137",appId:"1:577532998137:web:9bb5ac74ce49390cc00d28"};if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);const db=firebase.database();let allVideosData=[],videosToDisplayList=[],players={},currentCategory="All",videosDisplayedCount=0,videosPerLoad=10,isLoading=!1;const mainGrid=document.getElementById("main-video-grid"),sectionTitle=document.getElementById("video-section-title"),navMenu=document.getElementById("nav-menu"),refreshButton=document.getElementById("refresh-button"),loadingSpinner=document.getElementById("loading-spinner"),categoryInfo={All:"সকল ভিডিও",Waz:"📖 Waz",Nasheed:"🎵 Nasheed",Quran:"📘 Quran",Dua:"🙏 Dua"},reactionTypes=[{key:"barakallah",emoji:"❤️",text:"BarakAllah",color:"#e74c3c"},{key:"subhanallah",emoji:"🌟",text:"SubhanAllah",color:"#f39c12"},{key:"ameen",emoji:"🙌",text:"Ameen",color:"#00796b"}];const getStoredData=e=>JSON.parse(localStorage.getItem(e)||"{}"),setStoredData=(e,t)=>localStorage.setItem(e,JSON.stringify(t));function getVideoId(e){try{return e.includes("youtube.com/watch")?new URL(e).searchParams.get("v"):e.includes("youtu.be/")?new URL(e).pathname.substring(1):null}catch(t){return null}}function onPlayerStateChange(e){if(e.data===YT.PlayerState.PLAYING){const t=e.target.getIframe().id;for(const o in players)o!==t&&players[o].pauseVideo()}}function handleReaction(e,t,o){const a=getStoredData("userReactions"),n=getStoredData("categoryPreferences"),r=a[e.id],i=o.closest(".reaction-section");if(r===t.key){const l=o.querySelector(".react-btn"),c=o.querySelector(".reaction-count"),s=parseInt(c.textContent.slice(1,-1));l.classList.remove("reacted"),c.textContent=`(${(s>0?s-1:0)})`,delete a[e.id],n[e.category]=(n[e.category]||1)-1,db.ref(`videos/${e.id}/reactions/${t.key}`).transaction(e=>(e||1)-1)}else{if(r){const d=i.querySelector(`.reaction-item[data-reactkey="${r}"]`);if(d){d.querySelector(".react-btn").classList.remove("reacted");const u=d.querySelector(".reaction-count");let m=parseInt(u.textContent.slice(1,-1));u.textContent=`(${(m>0?m-1:0)})`}db.ref(`videos/${e.id}/reactions/${r}`).transaction(e=>(e||1)-1)}else n[e.category]=(n[e.category]||0)+1;const p=o.querySelector(".react-btn"),g=o.querySelector(".reaction-count"),h=parseInt(g.textContent.slice(1,-1));p.classList.add("reacted"),g.textContent=`(${h+1})`,a[e.id]=t.key,db.ref(`videos/${e.id}/reactions/${t.key}`).transaction(e=>(e||0)+1)}setStoredData("userReactions",a),setStoredData("categoryPreferences",n)}
     
-    // === সংশোধিত এবং অপটিমাইজড ফাংশন: createVideoCard ===
     async function createVideoCard(video) {
-        const videoId = getVideoId(video.link);
-        if (!videoId) return;
-
-        const videoCard = document.createElement('div');
-        videoCard.className = 'video-card is-loading';
-        videoCard.dataset.videoid = video.id;
-
-        videoCard.innerHTML = `
-            <div class="skeleton skeleton-image"></div>
-            <div class="skeleton-content">
-                <div class="skeleton skeleton-title"></div>
-                <div class="skeleton skeleton-subtitle"></div>
-                <div class="skeleton-reactions">
-                    <div class="skeleton skeleton-circle"></div>
-                    <div class="skeleton skeleton-circle"></div>
-                    <div class="skeleton skeleton-circle"></div>
-                </div>
-            </div>
-        `;
+        const videoId = getVideoId(video.link); if (!videoId) return;
+        const videoCard = document.createElement('div'); videoCard.className = 'video-card is-loading'; videoCard.dataset.videoid = video.id;
+        videoCard.innerHTML = `<div class="skeleton skeleton-image"></div><div class="skeleton-content"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-subtitle"></div><div class="skeleton-reactions"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-circle"></div></div></div>`;
         mainGrid.appendChild(videoCard);
-
-        const imageLoadPromise = new Promise((resolve, reject) => {
-            const img = new Image();
-            img.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
-            img.onload = () => resolve(img.src);
-            img.onerror = reject;
-        });
-
+        const imageLoadPromise = new Promise((resolve, reject) => { const img = new Image(); img.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`; img.onload = () => resolve(img.src); img.onerror = reject; });
         try {
-            const imgSrc = await imageLoadPromise;
-            
-            // ডেটাবেস থেকে সরাসরি টাইটেল ব্যবহার করা হচ্ছে
-            const title = video.title || "ভিডিও টাইটেল পাওয়া যায়নি";
-
-            const realContent = document.createElement('div');
-            realContent.className = 'real-content';
-
-            const thumbnailContainer = document.createElement('div');
-            thumbnailContainer.className = 'thumbnail-container';
-            thumbnailContainer.innerHTML = `
-                <img src="${imgSrc}" alt="${title}" loading="lazy">
-                <div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-            `;
-            
-            const interactionSection = document.createElement('div');
-            interactionSection.className = 'interaction-section';
-            // === সংশোধিত: টাইটেল এখানে সঠিকভাবে সেট করা হয়েছে ===
-            interactionSection.innerHTML = `
-                <h3 class="video-title">${title}</h3>
-                <div class="reaction-section"></div>
-            `;
-            
-            const reactionSection = interactionSection.querySelector('.reaction-section');
-            const userReactions = getStoredData('userReactions');
-            reactionTypes.forEach(type => {
-                const item = document.createElement('div'); item.className = 'reaction-item'; item.dataset.reactkey = type.key;
-                item.innerHTML = `<button class="react-btn ${userReactions[video.id] === type.key ? 'reacted' : ''}">${type.emoji}</button><div class="reaction-text" style="color:${type.color};">${type.text}</div><div class="reaction-count">(${(video.reactions && video.reactions[type.key]) || 0})</div>`;
-                item.onclick = () => handleReaction(video, type, item);
-                reactionSection.appendChild(item);
-            });
-
-            realContent.append(thumbnailContainer, interactionSection);
-            
-            videoCard.innerHTML = '';
-            videoCard.appendChild(realContent);
-
+            const imgSrc = await imageLoadPromise; const title = video.title || "ভিডিও টাইটেল পাওয়া যায়নি"; const realContent = document.createElement('div'); realContent.className = 'real-content';
+            const thumbnailContainer = document.createElement('div'); thumbnailContainer.className = 'thumbnail-container'; thumbnailContainer.innerHTML = `<img src="${imgSrc}" alt="${title}" loading="lazy"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`;
+            const interactionSection = document.createElement('div'); interactionSection.className = 'interaction-section'; interactionSection.innerHTML = `<h3 class="video-title">${title}</h3><div class="reaction-section"></div>`;
+            const reactionSection = interactionSection.querySelector('.reaction-section'); const userReactions = getStoredData('userReactions');
+            reactionTypes.forEach(type => { const item = document.createElement('div'); item.className = 'reaction-item'; item.dataset.reactkey = type.key; item.innerHTML = `<button class="react-btn ${userReactions[video.id] === type.key ? 'reacted' : ''}">${type.emoji}</button><div class="reaction-text" style="color:${type.color};">${type.text}</div><div class="reaction-count">(${(video.reactions && video.reactions[type.key]) || 0})</div>`; item.onclick = () => handleReaction(video, type, item); reactionSection.appendChild(item); });
+            realContent.append(thumbnailContainer, interactionSection); videoCard.innerHTML = ''; videoCard.appendChild(realContent);
             thumbnailContainer.addEventListener('click', () => {
                 try {
-                    const playerDiv = document.createElement('div');
-                    playerDiv.className = 'video-player';
-                    playerDiv.id = `player-${video.id}`;
-                    thumbnailContainer.innerHTML = ''; 
-                    thumbnailContainer.appendChild(playerDiv);
-                    
-                    players[playerDiv.id] = new YT.Player(playerDiv.id, {
-                        videoId: videoId,
-                        playerVars: { 'autoplay': 1, 'rel': 0 },
-                        events: { 'onStateChange': onPlayerStateChange }
-                    });
-                } catch(e) {
-                    console.error("YouTube Player তৈরিতে ব্যর্থ:", e);
-                    thumbnailContainer.innerHTML = '<p style="color:red; text-align:center; padding:1rem;">ভিডিও প্লেয়ার লোড করা সম্ভব হয়নি।</p>';
-                }
+                    const playerDiv = document.createElement('div'); playerDiv.className = 'video-player'; playerDiv.id = `player-${video.id}`; thumbnailContainer.innerHTML = ''; thumbnailContainer.appendChild(playerDiv);
+                    players[playerDiv.id] = new YT.Player(playerDiv.id, { videoId: videoId, playerVars: { 'autoplay': 1, 'rel': 0 }, events: { 'onStateChange': onPlayerStateChange } });
+                } catch(e) { console.error("YouTube Player তৈরিতে ব্যর্থ:", e); thumbnailContainer.innerHTML = '<p style="color:red; text-align:center; padding:1rem;">ভিডিও প্লেয়ার লোড করা সম্ভব হয়নি।</p>'; }
             }, { once: true });
-            
             videoCard.classList.remove('is-loading');
-
-        } catch (error) {
-            console.error('কার্ড কন্টেন্ট লোড হতে ব্যর্থ:', videoId, error);
-            videoCard.remove(); 
-        }
+        } catch (error) { console.error('কার্ড কন্টেন্ট লোড হতে ব্যর্থ:', videoId, error); videoCard.remove(); }
     }
     
-    // অপরিবর্তিত ফাংশনসমূহ
     function loadMoreVideos(){if(isLoading)return;isLoading=!0,loadingSpinner.style.display="block";const e=videosDisplayedCount,t=e+videosPerLoad,o=videosToDisplayList.slice(e,t);if(0===o.length)return isLoading=!1,void(loadingSpinner.style.display="none");o.forEach(e=>createVideoCard(e)),videosDisplayedCount+=o.length,isLoading=!1,loadingSpinner.style.display="none"}
-    function setupCategoryView(e){currentCategory=e,mainGrid.innerHTML="",players={},videosDisplayedCount=0,sectionTitle.innerText=categoryInfo[e]||"ভিডিওসমূহ",videosToDisplayList="All"===e?[...allVideosData].map(e=>({video:e,score:(getStoredData("categoryPreferences")[e.category]||0)+Math.random()})).sort((e,t)=>t.score-e.score).map(e=>e.video):allVideosData.filter(t=>t.category===e),0===videosToDisplayList.length?mainGrid.innerHTML='<p class="empty-category-message">এই বিভাগে কোনো ভিডিও পাওয়া যায়নি।</p>':loadMoreVideos()}
-    window.addEventListener("scroll",()=>{window.innerHeight+window.scrollY>=document.body.offsetHeight-500&&videosDisplayedCount<videosToDisplayList.length&&loadMoreVideos()});navMenu.addEventListener("click",e=>{e.target.tagName==="A"&&e.target.dataset.category&&(e.preventDefault(),setupCategoryView(e.target.dataset.category),navMenu.classList.contains("nav-open")&&navMenu.classList.remove("nav-open"))});refreshButton.addEventListener("click",()=>setupCategoryView(currentCategory));
+    
+    function setupCategoryView(category, isRefresh = false) {
+        currentCategory = category;
+        mainGrid.innerHTML = "";
+        players = {};
+        videosDisplayedCount = 0;
+        sectionTitle.innerText = categoryInfo[category] || "ভিডিওসমূহ";
+
+        let sourceVideos = (category === 'All') 
+            ? allVideosData 
+            : allVideosData.filter(video => video.category === category);
+
+        if (sourceVideos.length === 0) {
+            mainGrid.innerHTML = `<p class="empty-category-message">এই বিভাগে কোনো ভিডিও পাওয়া যায়নি।</p>`;
+            return;
+        }
+
+        const shuffleArray = arr => arr.slice().sort(() => Math.random() - 0.5);
+
+        if (isRefresh) {
+            videosToDisplayList = shuffleArray(sourceVideos);
+        } else {
+            const newVideosCount = Math.floor(allVideosData.length * 0.2);
+            const newVideos = allVideosData.slice(0, newVideosCount);
+            const reactedVideos = [...allVideosData].sort((a, b) => {
+                const reactionsA = Object.values(a.reactions || {}).reduce((sum, count) => sum + count, 0);
+                const reactionsB = Object.values(b.reactions || {}).reduce((sum, count) => sum + count, 0);
+                return reactionsB - reactionsA;
+            });
+
+            let finalVideoList = [];
+            let usedIds = new Set();
+            const totalVideosToShow = sourceVideos.length;
+            
+            const addVideos = (videoPool, count) => {
+                let added = 0;
+                for (const video of videoPool) {
+                    if (category !== 'All' && video.category !== category) continue;
+                    if (added < count && !usedIds.has(video.id)) {
+                        finalVideoList.push(video);
+                        usedIds.add(video.id);
+                        added++;
+                    }
+                    if(added >= count) break;
+                }
+            };
+
+            addVideos(newVideos, Math.floor(totalVideosToShow * 0.15));
+            addVideos(shuffleArray(newVideos), Math.floor(totalVideosToShow * 0.30));
+            addVideos(reactedVideos, Math.floor(totalVideosToShow * 0.30));
+            addVideos(shuffleArray(allVideosData), Math.floor(totalVideosToShow * 0.25));
+
+            if (finalVideoList.length < totalVideosToShow) {
+                const remainingPool = sourceVideos.filter(video => !usedIds.has(video.id));
+                finalVideoList.push(...remainingPool.slice(0, totalVideosToShow - finalVideoList.length));
+            }
+            
+            videosToDisplayList = finalVideoList;
+        }
+        
+        loadMoreVideos();
+    }
+
+    window.addEventListener("scroll",()=>{window.innerHeight+window.scrollY>=document.body.offsetHeight-500&&videosDisplayedCount<videosToDisplayList.length&&loadMoreVideos()});
+    navMenu.addEventListener("click",e=>{e.target.tagName==="A"&&e.target.dataset.category&&(e.preventDefault(),setupCategoryView(e.target.dataset.category),navMenu.classList.contains("nav-open")&&navMenu.classList.remove("nav-open"))});
+    refreshButton.addEventListener("click", () => setupCategoryView(currentCategory, true));
+    
     function onYouTubeIframeAPIReady(){db.ref("videos").once("value",e=>{allVideosData=[],e.exists()&&e.forEach(e=>{allVideosData.push({id:e.key,...e.val()})}),allVideosData.reverse(),setupCategoryView(currentCategory)})}
     const titleElement=document.getElementById("animated-title"),textToType="DeenFlix",typingSpeed=150,eraseSpeed=100,pauseDuration=2e3;let charIndex=0;function type(){charIndex<textToType.length?(titleElement.textContent+=textToType.charAt(charIndex++),setTimeout(type,typingSpeed)):setTimeout(erase,pauseDuration)}function erase(){charIndex>0?(titleElement.textContent=textToType.substring(0,--charIndex),setTimeout(erase,eraseSpeed)):setTimeout(type,typingSpeed)}const themeToggle=document.getElementById("theme-toggle"),body=document.body,savedTheme=localStorage.getItem("theme");"dark"===savedTheme&&body.classList.add("dark-mode"),themeToggle.addEventListener("click",()=>{body.classList.toggle("dark-mode"),localStorage.setItem("theme",body.classList.contains("dark-mode")?"dark":"light")});const menuIcon=document.getElementById("menu-icon");menuIcon.addEventListener("click",()=>navMenu.classList.toggle("nav-open")),document.addEventListener("click",function(e){const t=navMenu.contains(e.target),o=menuIcon.contains(e.target);navMenu.classList.contains("nav-open")&&!t&&!o&&navMenu.classList.remove("nav-open")}),document.addEventListener("DOMContentLoaded",type);
   </script>
