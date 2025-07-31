@@ -85,6 +85,9 @@
         opacity: 0;
         transition: opacity 0.3s ease, top 0.3s ease;
     }
+    .notification.error {
+        background-color: var(--danger);
+    }
     .notification.show { opacity: 1; top: 30px; }
 
     .hidden-content { display: none; }
@@ -137,7 +140,6 @@
 
   <!-- Main Admin Panel (Initially hidden) -->
   <div id="adminPanel" class="container hidden-content">
-    <!-- ... (your admin panel content is unchanged) ... -->
     <h1>📥 DeenFlix অ্যাডমিন প্যানেল</h1>
     <form id="videoForm">
       <div>
@@ -180,7 +182,7 @@
   </div>
 
   <script>
-    // --- New Enhanced Password Protection Script ---
+    // --- Enhanced Password Protection Script ---
     document.addEventListener("DOMContentLoaded", () => {
         const correctPassword = "mdfarukso123@admin";
         const maxAttempts = 5;
@@ -200,50 +202,44 @@
             const enteredPassword = passwordInput.value;
 
             if (enteredPassword === correctPassword) {
-                // On successful login
                 modalOverlay.style.opacity = '0';
                 setTimeout(() => { modalOverlay.style.display = 'none'; }, 300);
                 adminPanel.classList.remove("hidden-content");
                 showNotification("সফলভাবে লগইন করেছেন!", "success");
             } else {
-                // On incorrect password
                 loginAttempts++;
                 passwordInput.classList.add("error");
-                passwordInput.value = ""; // Clear the wrong password
+                passwordInput.value = ""; 
 
                 if (loginAttempts >= maxAttempts) {
-                    // Lock the form after max attempts
                     modal.innerHTML = `
                         <h2 style="color: var(--danger);">⛔️ অ্যাক্সেস লক!</h2>
                         <p>আপনি ${maxAttempts} বার ভুল পাসওয়ার্ড দিয়েছেন। এই পেজটি এখন নিষ্ক্রিয় করা হয়েছে।</p>
-                        <p>অনুগ্রহ করে পেজটি রিলোড করে আবার চেষ্টা করুন।</p>
                     `;
                 } else {
-                    // Show remaining attempts
                     const attemptsLeft = maxAttempts - loginAttempts;
                     passwordError.textContent = `ভুল পাসওয়ার্ড। ${attemptsLeft} টি চেষ্টা বাকি আছে।`;
-                    setTimeout(() => {
-                       passwordInput.classList.remove("error");
-                    }, 2000);
+                    setTimeout(() => { passwordInput.classList.remove("error"); }, 2000);
                 }
             }
         });
-        
-        function showNotification(message) {
-            const notification = document.createElement('div');
-            notification.className = 'notification';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            setTimeout(() => { notification.classList.add('show'); }, 10);
-            setTimeout(() => {
-                notification.classList.remove('show');
-                setTimeout(() => { notification.remove(); }, 300);
-            }, 3000);
-        }
     });
 
+    // --- Custom Notification Function ---
+    function showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+        setTimeout(() => { notification.classList.add('show'); }, 10);
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => { notification.remove(); }, 300);
+        }, 3000);
+    }
 
-    // --- Your existing Firebase and App logic (unchanged) ---
+
+    // --- Firebase and App logic ---
     const firebaseConfig = {
       apiKey: "AIzaSyBSzGX7miRjrBJAk339LpQDVZ-yfOMnA-E",
       authDomain: "deenflix-53217.firebaseapp.com",
@@ -293,20 +289,52 @@
         const videos = currentFilter === 'All' ? allVideos : allVideos.filter(video => video.category === currentFilter);
         renderTable(videos);
     }
-
+    
+    // ==========================================================
+    //  ভিডিও যুক্ত করার আপডেটেড ফাংশন (Duplicate Check)
+    // ==========================================================
     form.addEventListener("submit", (e) => {
       e.preventDefault();
       const category = categorySelect.value;
-      const link = videoLinkInput.value;
-      if (!getYoutubeVideoInfo(link)) { alert("দয়া করে একটি সঠিক ইউটিউব ভিডিও লিংক দিন।"); return; }
-      db.ref("videos").push().set({ category, link });
-      videoLinkInput.value = "";
-      videoLinkInput.focus();
+      const link = videoLinkInput.value.trim(); // ফাঁকা স্পেস মুছে ফেলা হলো
+
+      if (!getYoutubeVideoInfo(link)) { 
+          showNotification("দয়া করে একটি সঠিক ইউটিউব ভিডিও লিংক দিন।", "error");
+          return; 
+      }
+
+      const videosRef = db.ref("videos");
+      
+      // লিঙ্কটি ডাটাবেসে আছে কিনা তা চেক করা হচ্ছে
+      videosRef.orderByChild('link').equalTo(link).once('value')
+        .then((snapshot) => {
+            if (snapshot.exists()) {
+                // যদি লিঙ্কটি পাওয়া যায় (duplicate)
+                showNotification("এই ভিডিও লিংকটি ইতিমধ্যেই যুক্ত করা আছে।", "error");
+            } else {
+                // যদি লিঙ্কটি না পাওয়া যায় (unique)
+                videosRef.push().set({ category, link });
+                showNotification("ভিডিওটি সফলভাবে যুক্ত হয়েছে!", "success");
+                videoLinkInput.value = "";
+                videoLinkInput.focus();
+            }
+        })
+        .catch((error) => {
+            console.error("ডাটাবেস চেক করার সময় সমস্যা হয়েছে:", error);
+            showNotification("একটি সমস্যা হয়েছে, অনুগ্রহ করে আবার চেষ্টা করুন।", "error");
+        });
     });
+
 
     function deleteVideo(id) {
         if(confirm("আপনি কি সত্যিই এই ভিডিওটি ডিলিট করতে চান?")) {
-            db.ref("videos/" + id).remove();
+            db.ref("videos/" + id).remove()
+              .then(() => {
+                  showNotification("ভিডিওটি সফলভাবে ডিলিট করা হয়েছে।", "success");
+              })
+              .catch(() => {
+                  showNotification("ভিডিও ডিলিট করার সময় সমস্যা হয়েছে।", "error");
+              });
         }
     }
 
@@ -323,6 +351,7 @@
             });
         }
         allVideos.reverse();
+        // অ্যাডমিন প্যানেল দৃশ্যমান হলেই শুধুমাত্র টেবিল রেন্ডার হবে
         if (document.getElementById("adminPanel").classList.contains('hidden-content') === false) {
            filterAndRender();
         }
