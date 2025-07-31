@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DeenFlix Admin Panel</title>
+
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <style>
+    :root {
+      --primary: #00796b;
+      --success: #28a745;
+      --danger: #e74c3c;
+      --danger-hover: #c0392b;
+      --bg: #f4f7f6;
+      --white: #ffffff;
+      --gray: #e9ecef;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background-color: var(--bg);
+      color: #333;
+    }
+    
+    /* --- Password Modal Styles --- */
+    .password-modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        transition: opacity 0.3s ease;
+    }
+    .password-modal {
+        background: var(--white);
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        width: 90%;
+        max-width: 400px;
+        text-align: center;
+        transform: scale(0.9);
+        transition: transform 0.3s ease;
+    }
+    .password-modal h2 { margin-top: 0; margin-bottom: 1rem; color: var(--primary); }
+    .password-modal p { margin-bottom: 1.5rem; color: #666; }
+    .password-input {
+        width: 100%;
+        padding: 0.8rem;
+        font-size: 1rem;
+        border: 2px solid #ccc;
+        border-radius: 5px;
+        margin-bottom: 0.5rem;
+        transition: border-color 0.2s;
+    }
+    .password-input:focus { border-color: var(--primary); outline: none; }
+    .password-input.error { border-color: var(--danger); }
+    .password-error-msg { color: var(--danger); text-align: left; height: 1.2rem; font-size: 0.9rem; margin-bottom: 1rem; }
+    .login-btn { width: 100%; padding: 0.8rem; background-color: var(--primary); color: white; border: none; border-radius: 5px; font-size: 1.1rem; cursor: pointer; transition: background-color 0.2s; }
+    .login-btn:hover { background-color: #004d40; }
+    
+    /* --- Custom Notification Styles --- */
+    .notification {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background-color: var(--success);
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        z-index: 1001;
+        opacity: 0;
+        transition: opacity 0.3s ease, top 0.3s ease;
+    }
+    .notification.show { opacity: 1; top: 30px; }
+
+    .hidden-content { display: none; }
+    .container { max-width: 950px; margin: auto; background: var(--white); padding: 1.5rem; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+    h1 { text-align: center; color: var(--primary); font-size: 2rem; margin-bottom: 1rem; }
+    form { display: flex; flex-direction: column; gap: 1rem; padding-bottom: 1.5rem; border-bottom: 2px solid var(--gray); }
+    label { font-weight: 600; }
+    select, input[type="url"] { padding: 0.6rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 5px; width: 100%; }
+    select { appearance: none; background-color: #e0f2f1; border: 2px solid var(--primary); color: #004d40; padding: 0.6rem 0.8rem; font-weight: 600; border-radius: 8px; outline: none; background-image: url("data:image/svg+xml;utf8,<svg fill='%23004d40' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>"); background-repeat: no-repeat; background-position: right 0.7rem center; background-size: 1rem; }
+    button[type="submit"] { background-color: var(--primary); color: white; font-size: 1rem; padding: 0.8rem; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; }
+    button[type="submit"]:hover { background-color: #004d40; }
+    .filter-container { margin-top: 1.5rem; margin-bottom: 1rem; display: flex; align-items: center; gap: 0.5rem; }
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd; vertical-align: middle; }
+    th { background-color: #e0f2f1; }
+    th:nth-child(1), td:nth-child(1) { width: 130px; }
+    th:nth-child(2), td:nth-child(2) { width: 120px; }
+    th:nth-child(4), td:nth-child(4) { width: 60px; text-align: center; }
+    td { word-break: break-all; }
+    .thumbnail-img { width: 120px; height: 70px; object-fit: cover; border-radius: 5px; }
+    .delete-btn { background-color: var(--danger); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; transition: background-color 0.2s, transform 0.2s; display: flex; align-items: center; justify-content: center; }
+    .delete-btn:hover { background-color: var(--danger-hover); transform: scale(1.1); }
+    
+    @media (max-width: 768px) {
+      .container { padding: 1rem; }
+      thead { display: none; }
+      tr { display: block; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 8px; padding: 1rem; }
+      td { display: block; text-align: right; border-bottom: 1px dashed #eee; padding-left: 50%; position: relative; }
+      td:last-child { border-bottom: none; }
+      td::before { content: attr(data-label); position: absolute; left: 0.75rem; width: calc(50% - 1.5rem); text-align: left; font-weight: bold; color: var(--primary); }
+      td:nth-child(4) { text-align: center; }
+      .delete-btn { margin: 0 auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Password Modal HTML -->
+  <div id="passwordModalOverlay" class="password-modal-overlay">
+    <div id="passwordModal" class="password-modal">
+      <h2>🔐 অ্যাডমিন লগইন</h2>
+      <p>প্যানেলে প্রবেশ করতে আপনার পাসওয়ার্ড দিন।</p>
+      <form id="loginForm" onsubmit="return false;">
+        <input type="password" id="passwordInput" class="password-input" placeholder="পাসওয়ার্ড লিখুন...">
+        <div id="passwordError" class="password-error-msg"></div>
+        <button type="submit" class="login-btn">লগইন করুন</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Admin Panel (Initially hidden) -->
+  <div id="adminPanel" class="container hidden-content">
+    <!-- ... (your admin panel content is unchanged) ... -->
+    <h1>📥 DeenFlix অ্যাডমিন প্যানেল</h1>
+    <form id="videoForm">
+      <div>
+        <label for="category">📂 ভিডিও ক্যাটাগরি:</label>
+        <select id="category" required>
+          <option value="">-- নির্বাচন করুন --</option>
+          <option value="Waz">📖 Waz</option>
+          <option value="Nasheed">🎵 Nasheed</option>
+          <option value="Quran">📘 Quran</option>
+          <option value="Dua">🙏 Dua</option>
+        </select>
+      </div>
+      <div>
+        <label for="videoLink">🔗 ইউটিউব ভিডিও লিংক:</label>
+        <input type="url" id="videoLink" placeholder="https://www.youtube.com/watch?v=..." required />
+      </div>
+      <button type="submit">➕ ভিডিও যুক্ত করুন</button>
+    </form>
+    <div class="filter-container">
+        <label for="filterCategory">🔎 ফিল্টার করুন:</label>
+        <select id="filterCategory">
+            <option value="All">সকল ক্যাটাগরি</option>
+            <option value="Waz">📖 Waz</option>
+            <option value="Nasheed">🎵 Nasheed</option>
+            <option value="Quran">📘 Quran</option>
+            <option value="Dua">🙏 Dua</option>
+        </select>
+    </div>
+    <table id="videoTable">
+      <thead>
+        <tr>
+          <th>থাম্বনেইল</th>
+          <th>ক্যাটাগরি</th>
+          <th>ভিডিও লিংক</th>
+          <th>অ্যাকশন</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    // --- New Enhanced Password Protection Script ---
+    document.addEventListener("DOMContentLoaded", () => {
+        const correctPassword = "mdfarukso123@admin";
+        const maxAttempts = 5;
+        let loginAttempts = 0;
+
+        const modalOverlay = document.getElementById("passwordModalOverlay");
+        const modal = document.getElementById("passwordModal");
+        const loginForm = document.getElementById("loginForm");
+        const passwordInput = document.getElementById("passwordInput");
+        const passwordError = document.getElementById("passwordError");
+        const adminPanel = document.getElementById("adminPanel");
+        
+        setTimeout(() => { modal.style.transform = 'scale(1)'; }, 50);
+
+        loginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const enteredPassword = passwordInput.value;
+
+            if (enteredPassword === correctPassword) {
+                // On successful login
+                modalOverlay.style.opacity = '0';
+                setTimeout(() => { modalOverlay.style.display = 'none'; }, 300);
+                adminPanel.classList.remove("hidden-content");
+                showNotification("সফলভাবে লগইন করেছেন!", "success");
+            } else {
+                // On incorrect password
+                loginAttempts++;
+                passwordInput.classList.add("error");
+                passwordInput.value = ""; // Clear the wrong password
+
+                if (loginAttempts >= maxAttempts) {
+                    // Lock the form after max attempts
+                    modal.innerHTML = `
+                        <h2 style="color: var(--danger);">⛔️ অ্যাক্সেস লক!</h2>
+                        <p>আপনি ${maxAttempts} বার ভুল পাসওয়ার্ড দিয়েছেন। এই পেজটি এখন নিষ্ক্রিয় করা হয়েছে।</p>
+                        <p>অনুগ্রহ করে পেজটি রিলোড করে আবার চেষ্টা করুন।</p>
+                    `;
+                } else {
+                    // Show remaining attempts
+                    const attemptsLeft = maxAttempts - loginAttempts;
+                    passwordError.textContent = `ভুল পাসওয়ার্ড। ${attemptsLeft} টি চেষ্টা বাকি আছে।`;
+                    setTimeout(() => {
+                       passwordInput.classList.remove("error");
+                    }, 2000);
+                }
+            }
+        });
+        
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => { notification.classList.add('show'); }, 10);
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => { notification.remove(); }, 300);
+            }, 3000);
+        }
+    });
+
+
+    // --- Your existing Firebase and App logic (unchanged) ---
+    const firebaseConfig = {
+      apiKey: "AIzaSyBSzGX7miRjrBJAk339LpQDVZ-yfOMnA-E",
+      authDomain: "deenflix-53217.firebaseapp.com",
+      databaseURL: "https://deenflix-53217-default-rtdb.firebaseio.com",
+      projectId: "deenflix-53217",
+      storageBucket: "deenflix-53217.firebasestorage.app",
+      messagingSenderId: "577532998137",
+      appId: "1:577532998137:web:9bb5ac74ce49390cc00d28"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    const form = document.getElementById("videoForm");
+    const categorySelect = document.getElementById("category");
+    const videoLinkInput = document.getElementById("videoLink");
+    const tableBody = document.querySelector("#videoTable tbody");
+    const filterSelect = document.getElementById("filterCategory");
+    let allVideos = [];
+    let currentFilter = 'All';
+
+    function getYoutubeVideoInfo(url) {
+        let videoId = null;
+        try {
+            if (url.includes('youtube.com/watch?v=')) { videoId = new URL(url).searchParams.get('v'); } 
+            else if (url.includes('youtu.be/')) { videoId = new URL(url).pathname.substring(1); }
+        } catch(e) { console.error("Invalid URL"); return null; }
+        if (videoId) { return { id: videoId, thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg` }; }
+        return null;
+    }
+
+    function renderTable(videosToRender) {
+        tableBody.innerHTML = "";
+        videosToRender.forEach((video) => {
+            const videoInfo = getYoutubeVideoInfo(video.link);
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td data-label="থাম্বনেইল"><img src="${videoInfo ? videoInfo.thumbnail : ''}" alt="Thumbnail" class="thumbnail-img"></td>
+                <td data-label="ক্যাটাগরি">${video.category}</td>
+                <td data-label="ভিডিও লিংক"><a href="${video.link}" target="_blank">${video.link}</a></td>
+                <td data-label="অ্যাকশন"><button class="delete-btn" onclick="deleteVideo('${video.id}')">🗑️</button></td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function filterAndRender() {
+        const videos = currentFilter === 'All' ? allVideos : allVideos.filter(video => video.category === currentFilter);
+        renderTable(videos);
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const category = categorySelect.value;
+      const link = videoLinkInput.value;
+      if (!getYoutubeVideoInfo(link)) { alert("দয়া করে একটি সঠিক ইউটিউব ভিডিও লিংক দিন।"); return; }
+      db.ref("videos").push().set({ category, link });
+      videoLinkInput.value = "";
+      videoLinkInput.focus();
+    });
+
+    function deleteVideo(id) {
+        if(confirm("আপনি কি সত্যিই এই ভিডিওটি ডিলিট করতে চান?")) {
+            db.ref("videos/" + id).remove();
+        }
+    }
+
+    filterSelect.addEventListener('change', (e) => {
+        currentFilter = e.target.value;
+        filterAndRender();
+    });
+    
+    db.ref("videos").on("value", (snapshot) => {
+        allVideos = [];
+        if(snapshot.exists()){
+            snapshot.forEach((child) => {
+                allVideos.push({ id: child.key, ...child.val() });
+            });
+        }
+        allVideos.reverse();
+        if (document.getElementById("adminPanel").classList.contains('hidden-content') === false) {
+           filterAndRender();
+        }
+    });
+  </script>
+
+</body>
+</html>
