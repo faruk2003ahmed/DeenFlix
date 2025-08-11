@@ -1,4 +1,4 @@
-const CACHE_NAME = 'deenflix-v1';
+const CACHE_NAME = 'deenflix-v2';
 // যে ফাইলগুলো অফলাইনে ব্যবহারের জন্য সেভ করে রাখা হবে
 const urlsToCache = [
   '/DeenFlix/',
