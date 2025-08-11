@@ -46,6 +46,10 @@
     .spinner{border:4px solid rgba(0,0,0,.1);width:36px;height:36px;border-radius:50%;border-left-color:#00796b;animation:spin 1s ease infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     
+    /* === ভিডিও প্লেয়ারের জন্য নতুন লোডিং অ্যানিমেশন === */
+    .video-loader { display: inline-block; width: 50px; height: 50px; border: 5px solid rgba(255, 255, 255, 0.4); border-radius: 50%; border-top-color: #fff; animation: spin 1s ease-in-out infinite; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; }
+    body.dark-mode .video-loader { border: 5px solid rgba(0, 0, 0, 0.4); border-top-color: #b2dfdb; }
+
     @media (max-width:768px){#menu-icon{display:block}header h1{font-size:1.5rem}nav{position:fixed;top:0;left:0;width:auto;height:100vh;background:#004d40;box-shadow:2px 0 5px rgba(0,0,0,.2);flex-direction:column;justify-content:flex-start;padding:80px 1.5rem 0 1.5rem;transform:translateX(-100%);transition:transform .3s ease-in-out;z-index:1000}nav.nav-open{transform:translateX(0)}nav a{text-align:left;font-size:1rem;white-space:nowrap;width:auto;margin:0 0 10px;padding:.8rem 1.5rem;border-radius:8px;background:rgba(0,0,0,.15);opacity:0;transform:translateY(-15px);transition:opacity .3s ease-out,transform .3s ease-out}nav.nav-open a{opacity:1;transform:translateY(0)}nav.nav-open a:nth-child(1){transition-delay:.15s}nav.nav-open a:nth-child(2){transition-delay:.2s}nav.nav-open a:nth-child(3){transition-delay:.25s}nav.nav-open a:nth-child(4){transition-delay:.3s}nav.nav-open a:nth-child(5){transition-delay:.35s}nav.nav-open a:nth-child(6){transition-delay:.4s}nav.nav-open a:nth-child(7){transition-delay:.45s}}
     .thumbnail-placeholder { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #e0e0e0; color: #333; font-size: 0.9rem; font-weight: bold; }
     body.dark-mode .thumbnail-placeholder { background-color: #2c2c2c; color: #eee; }
@@ -67,11 +71,12 @@
       <a href="#" data-category="Quran">Quran</a>
       <a href="#" data-category="Nasheed">Nasheed</a>
       <a href="#" data-category="Dua">Dua</a>
-      <a href="developer.html">About</a>
+      <!-- পরিবর্তিত মেনু অর্ডার -->
       <a href="#" data-category="Saved">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17,3H7C5.9,3,5,3.9,5,5v16l7-3l7,3V5C22,3.9,21.1,3,17,3z"></path></svg>
           Saved Videos
       </a>
+      <a href="developer.html">About</a>
   </nav>
   <main><div class="video-section-container"><div class="title-container"><h2 id="video-section-title" class="category-title"></h2><svg id="refresh-button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M17.65,6.35C16.2,4.9,14.21,4,12,4c-4.42,0-7.99,3.58-7.99,8s3.57,8,7.99,8c3.73,0,6.84-2.55,7.73-6h-2.08c-0.82,2.33-3.04,4-5.65,4-3.31,0-6-2.69-6-6s2.69-6,6-6c1.66,0,3.14,0.69,4.22,1.78L13,11h7V4L17.65,6.35z"/></svg></div><div id="main-video-grid" class="video-grid"></div><div id="loading-spinner"><div class="spinner"></div></div></div></main>
   <footer><p>© 2025 DeenFlix. সর্বস্বত্ব সংরক্ষিত।</p></footer>
@@ -105,7 +110,31 @@
 
     // --- Player Logic ---
     function createAndLaunchPlayer(options){const{target,videoId,dbId,startTime=0,shouldPlay=!1}=options;if(!target||!videoId)return;target.innerHTML='';const e=`player-${dbId}-${Date.now()}`,t=document.createElement('div');t.id=e,target.appendChild(t);try{new YT.Player(e,{videoId:videoId,playerVars:{autoplay:0,rel:0},events:{onReady:e=>{e.target.seekTo(startTime,!0),shouldPlay&&e.target.playVideo(),activePlayer=e.target,activeDbId=dbId,isTransitioning=!1},onStateChange:onPlayerStateChange}})}catch(o){console.error("Player creation failed:",o),target.innerHTML=`<p style="color:red;">প্লেয়ার তৈরি করা যায়নি।</p>`,isTransitioning=!1}}
-    function playVideoInCard(e){e&&(cleanUpCurrentPlayer(),createAndLaunchPlayer({target:mainGrid.querySelector(`.video-card[data-videoid="${e.id}"]`).querySelector(".thumbnail-container"),videoId:getVideoId(e.link),dbId:e.id,startTime:0,shouldPlay:!0}))}
+    
+    // === পরিবর্তিত ফাংশন (লোডিং অ্যানিমেশন সহ) ===
+    function playVideoInCard(video) {
+        if (!video) return;
+        
+        // প্রথমে অন্য কোনো প্লেয়ার চালু থাকলে তা বন্ধ করুন
+        cleanUpCurrentPlayer();
+
+        // নতুন প্লেয়ারের জন্য টার্গেট কন্টেইনার খুঁজুন
+        const targetContainer = mainGrid.querySelector(`.video-card[data-videoid="${video.id}"] .thumbnail-container`);
+        if (!targetContainer) return;
+
+        // থাম্বনেইল কন্টেইনারে লোডিং অ্যানিমেশন যুক্ত করুন
+        targetContainer.innerHTML = '<div class="video-loader"></div>';
+
+        // এখন নতুন প্লেয়ার তৈরি করুন (এটি লোডারটিকে প্রতিস্থাপন করবে)
+        createAndLaunchPlayer({
+            target: targetContainer,
+            videoId: getVideoId(video.link),
+            dbId: video.id,
+            startTime: 0,
+            shouldPlay: true
+        });
+    }
+
     function cleanUpCurrentPlayer(){activePlayer&&"function"==typeof activePlayer.destroy&&activePlayer.destroy(),activePlayer=null,activeDbId=null,floatingPlayerContainer.classList.remove("visible"),floatingPlayerContent.innerHTML='',document.querySelectorAll(".thumbnail-placeholder").forEach(e=>{const t=e.closest(".video-card");t&&(e.parentElement.innerHTML='<div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>')})}
     function onPlayerStateChange(e){e.data===YT.PlayerState.ENDED&&cleanUpCurrentPlayer()}
     function handleFloatingPlayer(){if(isTransitioning||!activePlayer||!activeDbId)return;const e=mainGrid.querySelector(`.video-card[data-videoid="${activeDbId}"]`);if(!e)return;const t=e.querySelector(".thumbnail-container"),o=t.getBoundingClientRect(),a=o.top<window.innerHeight&&o.bottom>0,n=activePlayer.getVideoData().video_id,r=activePlayer.getCurrentTime(),i=activePlayer.getPlayerState()===YT.PlayerState.PLAYING;!a&&!floatingPlayerContainer.classList.contains("visible")?(isTransitioning=!0,activePlayer.destroy(),activePlayer=null,t.innerHTML='<div class="thumbnail-placeholder">▶️ এখন চলছে...</div>',floatingPlayerContainer.classList.add("visible"),createAndLaunchPlayer({target:floatingPlayerContent,videoId:n,dbId:activeDbId,startTime:r,shouldPlay:i})):a&&floatingPlayerContainer.classList.contains("visible")&&(isTransitioning=!0,activePlayer.destroy(),activePlayer=null,floatingPlayerContainer.classList.remove("visible"),floatingPlayerContent.innerHTML='',createAndLaunchPlayer({target:t,videoId:n,dbId:activeDbId,startTime:r,shouldPlay:i}))}
@@ -233,12 +262,8 @@
     document.addEventListener("DOMContentLoaded", () => {
         type();
 
-        // =======================================================
-        // === PWA সার্ভিস ওয়ার্কার রেজিস্টার করার জন্য নতুন কোড ===
-        // =======================================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                // আপনার রিপোজিটরির নামের সাথে মিলিয়ে path দিন
                 navigator.serviceWorker.register('/DeenFlix/service-worker.js')
                 .then(registration => {
                     console.log('ServiceWorker registration successful: ', registration.scope);
