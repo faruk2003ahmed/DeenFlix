@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>DeenFlix - ইসলামিক কন্টেন্ট হাব</title>
   
-  <!-- Manifest ফাইলের লিঙ্ক (আগে থেকেই ছিল, সঠিক আছে) -->
+  <!-- Manifest ফাইলের লিঙ্ক -->
   <link rel="manifest" href="manifest.json">
   
   <!-- থিম কালার মেটা ট্যাগ (iOS Safari-এর জন্য) -->
@@ -86,26 +86,169 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
   <script>
-    // আপনার বিদ্যমান সমস্ত জাভাস্ক্রিপ্ট কোড এখানে থাকবে...
-    // ... (পূর্ববর্তী সব কোড)
+    // Firebase Config
+    const firebaseConfig={apiKey:"AIzaSyBSzGX7miRjrBJAk339LpQDVZ-yfOMnA-E",authDomain:"deenflix-53217.firebaseapp.com",databaseURL:"https://deenflix-53217-default-rtdb.firebaseio.com",projectId:"deenflix-53217",storageBucket:"deenflix-53217.firebasestorage.app",messagingSenderId:"577532998137",appId:"1:577532998137:web:9bb5ac74ce49390cc00d28"};if(!firebase.apps.length)firebase.initializeApp(firebaseConfig);const db=firebase.database();
+    
+    // Global State
+    let allVideosData=[],videosToDisplayList=[],currentCategory="All",videosDisplayedCount=0,videosPerLoad=10,isLoading=!1,isTransitioning=!1;
+    let activePlayer = null;
+    let activeDbId = null; 
 
-    const titleElement=document.getElementById("animated-title"),textToType="DeenFlix",typingSpeed=150,eraseSpeed=100,pauseDuration=2e3;let charIndex=0;function type(){charIndex<textToType.length?(titleElement.textContent+=textToType.charAt(charIndex++),setTimeout(type,typingSpeed)):setTimeout(erase,pauseDuration)}function erase(){charIndex>0?(titleElement.textContent=textToType.substring(0,--charIndex),setTimeout(erase,eraseSpeed)):setTimeout(type,typingSpeed)}const themeToggle=document.getElementById("theme-toggle"),body=document.body,savedTheme=localStorage.getItem("theme");"dark"===savedTheme&&body.classList.add("dark-mode"),themeToggle.addEventListener("click",()=>{body.classList.toggle("dark-mode"),localStorage.setItem("theme",body.classList.contains("dark-mode")?"dark":"light")});const menuIcon=document.getElementById("menu-icon");menuIcon.addEventListener("click",()=>navMenu.classList.toggle("nav-open")),document.addEventListener("click",function(e){const t=navMenu.contains(e.target),o=menuIcon.contains(e.target);navMenu.classList.contains("nav-open")&&!t&&!o&&navMenu.classList.remove("nav-open")}),document.addEventListener("DOMContentLoaded",type);
+    // DOM Elements
+    const floatingPlayerContainer=document.getElementById('floating-player-container'),floatingPlayerContent=document.getElementById('floating-player-content'),floatingPlayerCloseBtn=document.getElementById('floating-player-close'),mainGrid=document.getElementById("main-video-grid"),sectionTitle=document.getElementById("video-section-title"),navMenu=document.getElementById("nav-menu"),refreshButton=document.getElementById("refresh-button"),loadingSpinner=document.getElementById("loading-spinner");
+    
+    // Static Data
+    const categoryInfo={All:"সকল ভিডিও",Waz:"📖 Waz",Nasheed:"🎵 Nasheed",Quran:"📘 Quran",Dua:"🙏 Dua", Saved:"🔖 সেভ করা ভিডিও"},reactionTypes=[{key:"barakallah",emoji:"❤️",text:"BarakAllah",color:"#e74c3c"},{key:"subhanallah",emoji:"🌟",text:"SubhanAllah",color:"#f39c12"},{key:"ameen",emoji:"🙌",text:"Ameen",color:"#00796b"}];
+    
+    // Utility Functions
+    const getStoredData=e=>JSON.parse(localStorage.getItem(e)||"{}"),setStoredData=(e,t)=>localStorage.setItem(e,JSON.stringify(t));function getVideoId(e){try{const t=new URL(e);return t.hostname.includes("youtu.be")?t.pathname.substring(1):t.searchParams.get("v")}catch(o){return null}}
 
-    // =======================================================
-    // === PWA সার্ভিস ওয়ার্কার রেজিস্টার করার জন্য নতুন কোড ===
-    // =======================================================
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        // আপনার রিপোজিটরির নামের সাথে মিলিয়ে path দিন
-        navigator.serviceWorker.register('/DeenFlix/service-worker.js')
-          .then(registration => {
-            console.log('ServiceWorker registration successful: ', registration.scope);
-          })
-          .catch(err => {
-            console.error('ServiceWorker registration failed: ', err);
-          });
-      });
+    // --- Player Logic ---
+    function createAndLaunchPlayer(options){const{target,videoId,dbId,startTime=0,shouldPlay=!1}=options;if(!target||!videoId)return;target.innerHTML='';const e=`player-${dbId}-${Date.now()}`,t=document.createElement('div');t.id=e,target.appendChild(t);try{new YT.Player(e,{videoId:videoId,playerVars:{autoplay:0,rel:0},events:{onReady:e=>{e.target.seekTo(startTime,!0),shouldPlay&&e.target.playVideo(),activePlayer=e.target,activeDbId=dbId,isTransitioning=!1},onStateChange:onPlayerStateChange}})}catch(o){console.error("Player creation failed:",o),target.innerHTML=`<p style="color:red;">প্লেয়ার তৈরি করা যায়নি।</p>`,isTransitioning=!1}}
+    function playVideoInCard(e){e&&(cleanUpCurrentPlayer(),createAndLaunchPlayer({target:mainGrid.querySelector(`.video-card[data-videoid="${e.id}"]`).querySelector(".thumbnail-container"),videoId:getVideoId(e.link),dbId:e.id,startTime:0,shouldPlay:!0}))}
+    function cleanUpCurrentPlayer(){activePlayer&&"function"==typeof activePlayer.destroy&&activePlayer.destroy(),activePlayer=null,activeDbId=null,floatingPlayerContainer.classList.remove("visible"),floatingPlayerContent.innerHTML='',document.querySelectorAll(".thumbnail-placeholder").forEach(e=>{const t=e.closest(".video-card");t&&(e.parentElement.innerHTML='<div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>')})}
+    function onPlayerStateChange(e){e.data===YT.PlayerState.ENDED&&cleanUpCurrentPlayer()}
+    function handleFloatingPlayer(){if(isTransitioning||!activePlayer||!activeDbId)return;const e=mainGrid.querySelector(`.video-card[data-videoid="${activeDbId}"]`);if(!e)return;const t=e.querySelector(".thumbnail-container"),o=t.getBoundingClientRect(),a=o.top<window.innerHeight&&o.bottom>0,n=activePlayer.getVideoData().video_id,r=activePlayer.getCurrentTime(),i=activePlayer.getPlayerState()===YT.PlayerState.PLAYING;!a&&!floatingPlayerContainer.classList.contains("visible")?(isTransitioning=!0,activePlayer.destroy(),activePlayer=null,t.innerHTML='<div class="thumbnail-placeholder">▶️ এখন চলছে...</div>',floatingPlayerContainer.classList.add("visible"),createAndLaunchPlayer({target:floatingPlayerContent,videoId:n,dbId:activeDbId,startTime:r,shouldPlay:i})):a&&floatingPlayerContainer.classList.contains("visible")&&(isTransitioning=!0,activePlayer.destroy(),activePlayer=null,floatingPlayerContainer.classList.remove("visible"),floatingPlayerContent.innerHTML='',createAndLaunchPlayer({target:t,videoId:n,dbId:activeDbId,startTime:r,shouldPlay:i}))}
+
+    // --- Core App Logic (Data Loading, UI, etc.) ---
+    function handleReaction(e,t,o){const a=getStoredData("userReactions"),n=getStoredData("categoryPreferences"),r=a[e.id],i=o.closest(".reaction-section");if(r===t.key){const l=o.querySelector(".react-btn"),c=o.querySelector(".reaction-count"),s=parseInt(c.textContent.slice(1,-1));l.classList.remove("reacted"),c.textContent=`(${(s>0?s-1:0)})`,delete a[e.id],n[e.category]=(n[e.category]||1)-1,db.ref(`videos/${e.id}/reactions/${t.key}`).transaction(e=>(e||1)-1)}else{if(r){const d=i.querySelector(`.reaction-item[data-reactkey="${r}"]`);if(d){d.querySelector(".react-btn").classList.remove("reacted");const u=d.querySelector(".reaction-count");let m=parseInt(u.textContent.slice(1,-1));u.textContent=`(${(m>0?m-1:0)})`}db.ref(`videos/${e.id}/reactions/${r}`).transaction(e=>(e||1)-1)}else n[e.category]=(n[e.category]||0)+1;const p=o.querySelector(".react-btn"),g=o.querySelector(".reaction-count"),h=parseInt(g.textContent.slice(1,-1));p.classList.add("reacted"),g.textContent=`(${h+1})`,a[e.id]=t.key,db.ref(`videos/${e.id}/reactions/${t.key}`).transaction(e=>(e||0)+1)}setStoredData("userReactions",a),setStoredData("categoryPreferences",n)}
+    
+    function handleSave(video, videoCard) {
+        const savedVideos = getStoredData('savedVideos');
+        const saveBtn = videoCard.querySelector('.save-btn');
+        if (savedVideos[video.id]) {
+            delete savedVideos[video.id];
+            saveBtn.classList.remove('saved');
+            if (currentCategory === 'Saved') {
+                videoCard.style.transition = 'opacity 0.3s ease';
+                videoCard.style.opacity = '0';
+                setTimeout(() => {
+                    videoCard.remove();
+                    if (mainGrid.children.length === 0) {
+                         mainGrid.innerHTML = `<p class="empty-category-message">কোনো ভিডিও সেভ করা নেই।</p>`;
+                    }
+                }, 300);
+            }
+        } else {
+            savedVideos[video.id] = true;
+            saveBtn.classList.add('saved');
+        }
+        setStoredData('savedVideos', savedVideos);
     }
+    
+    async function createVideoCard(video) {
+        const youtubeId = getVideoId(video.link); if (!youtubeId) return;
+        const videoCard = document.createElement('div'); videoCard.className = 'video-card is-loading'; videoCard.dataset.videoid = video.id;
+        videoCard.innerHTML = `<div class="skeleton skeleton-image"></div><div class="skeleton-content"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-subtitle"></div><div class="skeleton-reactions"><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-circle"></div><div class="skeleton skeleton-circle"></div></div></div>`;
+        mainGrid.appendChild(videoCard);
+        
+        const imageLoadPromise = new Promise((resolve, reject) => { const img = new Image(); img.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`; img.onload = () => resolve(img.src); img.onerror = reject; });
+        try {
+            const imgSrc = await imageLoadPromise; const title = video.title || "ভিডিও টাইটেল পাওয়া যায়নি"; const realContent = document.createElement('div'); realContent.className = 'real-content';
+            const thumbnailContainer = document.createElement('div'); thumbnailContainer.className = 'thumbnail-container'; thumbnailContainer.innerHTML = `<img src="${imgSrc}" alt="${title}" loading="lazy"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`;
+            const interactionSection = document.createElement('div'); interactionSection.className = 'interaction-section'; 
+            interactionSection.innerHTML = `<h3 class="video-title">${title}</h3><div class="video-category-link">${categoryInfo[video.category] || video.category}</div><div class="reaction-section"></div>`;
+            
+            const reactionSection = interactionSection.querySelector('.reaction-section'); const userReactions = getStoredData('userReactions');
+            reactionTypes.forEach(type => { const item = document.createElement('div'); item.className = 'reaction-item'; item.dataset.reactkey = type.key; item.innerHTML = `<button class="react-btn ${userReactions[video.id] === type.key ? 'reacted' : ''}">${type.emoji}</button><div class="reaction-text" style="color:${type.color};">${type.text}</div><div class="reaction-count">(${(video.reactions && video.reactions[type.key]) || 0})</div>`; item.onclick = () => handleReaction(video, type, item); reactionSection.appendChild(item); });
+            
+            const savedVideos = getStoredData('savedVideos');
+            const saveItem = document.createElement('div'); saveItem.className = 'reaction-item save-item'; saveItem.title = 'ভিডিও সেভ করুন';
+            saveItem.innerHTML = `<button class="react-btn save-btn ${savedVideos[video.id] ? 'saved' : ''}"><svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg></button><div class="reaction-text">Save</div>`;
+            saveItem.onclick = () => handleSave(video, videoCard);
+            reactionSection.appendChild(saveItem);
+
+            realContent.append(thumbnailContainer, interactionSection); videoCard.innerHTML = ''; videoCard.appendChild(realContent);
+            
+            thumbnailContainer.addEventListener('click', () => playVideoInCard(video));
+            interactionSection.querySelector('.video-category-link').addEventListener('click', (e) => { e.stopPropagation(); setupCategoryView(video.category); });
+            videoCard.classList.remove('is-loading');
+        } catch (error) { console.error('কার্ড কন্টেন্ট লোড হতে ব্যর্থ:', youtubeId, error); videoCard.remove(); }
+    }
+
+    function loadMoreVideos(){if(isLoading)return;isLoading=!0,loadingSpinner.style.display="block";const e=videosDisplayedCount,t=e+videosPerLoad,o=videosToDisplayList.slice(e,t);if(0===o.length)return isLoading=!1,void(loadingSpinner.style.display="none");o.forEach(e=>createVideoCard(e)),videosDisplayedCount+=o.length,isLoading=!1,loadingSpinner.style.display="none"}
+    
+    function setupCategoryView(category) {
+        currentCategory = category;
+        cleanUpCurrentPlayer();
+        mainGrid.innerHTML = "";
+        videosDisplayedCount = 0;
+        sectionTitle.innerText = categoryInfo[category] || "ভিডিওসমূহ";
+        
+        if (category === 'Saved') {
+            const savedVideos = getStoredData('savedVideos');
+            const savedVideoIds = Object.keys(savedVideos);
+            if (savedVideoIds.length === 0) {
+                mainGrid.innerHTML = `<p class="empty-category-message">কোনো ভিডিও সেভ করা নেই।</p>`;
+                return;
+            }
+            videosToDisplayList = allVideosData.filter(video => savedVideoIds.includes(video.id));
+        } else {
+            let sourceVideos = (category === 'All') 
+                ? allVideosData 
+                : allVideosData.filter(video => video.category === category);
+            
+            if (sourceVideos.length === 0) {
+                mainGrid.innerHTML = `<p class="empty-category-message">এই বিভাগে কোনো ভিডিও পাওয়া যায়নি।</p>`;
+                return;
+            }
+            videosToDisplayList = sourceVideos.slice().sort(() => Math.random() - 0.5);
+        }
+        loadMoreVideos();
+    }
+    
+    // --- Event Listeners and Initialization ---
+    window.addEventListener("scroll",()=>{!isLoading&&videosDisplayedCount<videosToDisplayList.length&&window.innerHeight+window.scrollY>=document.body.offsetHeight-500&&loadMoreVideos(),handleFloatingPlayer()});
+    navMenu.addEventListener("click",e=>{if("A"===e.target.tagName||e.target.closest("a")){e.preventDefault();const t=(e.target.closest("a")).dataset.category;t&&setupCategoryView(t),navMenu.classList.contains("nav-open")&&navMenu.classList.remove("nav-open")}});
+    refreshButton.addEventListener("click",()=>setupCategoryView(currentCategory));
+    floatingPlayerCloseBtn.addEventListener('click',cleanUpCurrentPlayer);
+    
+    function onYouTubeIframeAPIReady(){
+        db.ref("videos").once("value",e=>{
+            allVideosData=[];
+            e.exists()&&e.forEach(e=>{
+                allVideosData.push({id:e.key,...e.val()})
+            });
+            allVideosData.reverse();
+            setupCategoryView(currentCategory);
+        });
+    }
+
+    const titleElement=document.getElementById("animated-title"),textToType="DeenFlix",typingSpeed=150,eraseSpeed=100,pauseDuration=2e3;let charIndex=0;
+    function type(){charIndex<textToType.length?(titleElement.textContent+=textToType.charAt(charIndex++),setTimeout(type,typingSpeed)):setTimeout(erase,pauseDuration)}
+    function erase(){charIndex>0?(titleElement.textContent=textToType.substring(0,--charIndex),setTimeout(erase,eraseSpeed)):setTimeout(type,typingSpeed)}
+
+    const themeToggle=document.getElementById("theme-toggle"),body=document.body,savedTheme=localStorage.getItem("theme");
+    "dark"===savedTheme&&body.classList.add("dark-mode");
+    themeToggle.addEventListener("click",()=>{body.classList.toggle("dark-mode"),localStorage.setItem("theme",body.classList.contains("dark-mode")?"dark":"light")});
+    
+    const menuIcon=document.getElementById("menu-icon");
+    menuIcon.addEventListener("click",()=>navMenu.classList.toggle("nav-open"));
+    
+    document.addEventListener("click",function(e){
+        const t=navMenu.contains(e.target),o=menuIcon.contains(e.target);
+        navMenu.classList.contains("nav-open")&&!t&&!o&&navMenu.classList.remove("nav-open")
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        type();
+
+        // =======================================================
+        // === PWA সার্ভিস ওয়ার্কার রেজিস্টার করার জন্য নতুন কোড ===
+        // =======================================================
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // আপনার রিপোজিটরির নামের সাথে মিলিয়ে path দিন
+                navigator.serviceWorker.register('/DeenFlix/service-worker.js')
+                .then(registration => {
+                    console.log('ServiceWorker registration successful: ', registration.scope);
+                })
+                .catch(err => {
+                    console.error('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    });
 
   </script>
 </body>
