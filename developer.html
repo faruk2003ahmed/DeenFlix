@@ -3,164 +3,449 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>About Developer - DeenFlix</title>
+  <title>Faruk Ahmed - Web Developer</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <!-- Internal CSS -->
   <style>
-    /* বেসিক স্টাইল */
+    /* ==================== বেসিক এবং গ্লোবাল স্টাইল ==================== */
+    :root {
+      --primary-color: #00796b;
+      --primary-dark: #004d40;
+      --light-bg: #f8f9fa;
+      --light-card-bg: #ffffff;
+      --light-text: #1c1c1c;
+      --light-shadow: rgba(0,0,0,0.1);
+
+      --dark-bg: #121212;
+      --dark-card-bg: #1e1e1e;
+      --dark-text: #f1f1f1;
+      --dark-shadow: rgba(0,0,0,0.4);
+
+      --font-family: 'Hind Siliguri', 'Segoe UI', sans-serif;
+    }
+
     body {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f8f9fa;
-      color: #1c1c1c;
+      font-family: var(--font-family);
+      background-color: var(--light-bg);
+      color: var(--light-text);
       transition: background-color 0.3s, color 0.3s;
     }
+
     body.dark-mode {
-      background-color: #121212;
-      color: #f1f1f1;
+      background-color: var(--dark-bg);
+      color: var(--dark-text);
     }
-    
-    /* হেডার স্টাইল */
+
+    .container {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 0 1rem;
+    }
+
+    section {
+      margin-bottom: 3rem;
+      animation: fadeIn 1s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==================== হেডার স্টাইল ==================== */
     header {
-      background: linear-gradient(to right, #004d40, #00796b);
+      background: linear-gradient(to right, var(--primary-dark), var(--primary-color));
       color: #fff;
-      padding: 0.8rem 1rem;
-      text-align: center;
+      padding: 0.8rem 1.5rem;
       min-height: 45px; 
       display: flex;
       align-items: center;
       justify-content: space-between;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
-    header h1 {
-      margin: 0;
-      font-size: 1.8rem;
-    }
-    header a {
+
+    header .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
       color: white;
       text-decoration: none;
-      font-weight: bold;
+    }
+
+    header .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+
+    header .home-link {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
       padding: 0.5rem 1rem;
       border: 1px solid white;
       border-radius: 5px;
       transition: background-color 0.2s, color 0.2s;
     }
-    header a:hover {
+
+    header .home-link:hover, header .home-link:focus {
         background-color: white;
-        color: #004d40;
+        color: var(--primary-dark);
+        outline: none;
     }
 
-    /* ডেভেলপার কার্ড */
-    .container {
-      max-width: 800px;
-      margin: 3rem auto;
-      padding: 2rem;
-      text-align: center;
+    /* ==================== থিম সুইচ স্টাইল ==================== */
+    .theme-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 28px;
     }
+    .theme-switch input { display: none; }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 28px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+    input:checked + .slider { background-color: var(--primary-color); }
+    input:checked + .slider:before { transform: translateX(22px); }
+
+    /* ==================== ডেভেলপার কার্ড ==================== */
     .developer-card {
-      background-color: #fff;
+      background-color: var(--light-card-bg);
       border-radius: 15px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-      padding: 2rem;
+      box-shadow: 0 8px 25px var(--light-shadow);
+      padding: 2.5rem;
+      margin-top: 2rem;
+      text-align: center;
       transition: background-color 0.3s, box-shadow 0.3s;
     }
     body.dark-mode .developer-card {
-      background-color: #1e1e1e;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+      background-color: var(--dark-card-bg);
+      box-shadow: 0 8px 30px var(--dark-shadow);
     }
-    
     .profile-pic {
       width: 150px;
       height: 150px;
       border-radius: 50%;
       object-fit: cover;
-      border: 5px solid #00796b;
+      border: 5px solid var(--primary-color);
       margin-bottom: 1rem;
     }
-    
     .developer-name {
-      font-size: 2rem;
-      font-weight: 600;
-      margin: 0;
+      font-size: 2.2rem;
+      font-weight: 700;
+      margin: 0.5rem 0;
     }
     .developer-name a {
         text-decoration: none;
         color: inherit;
         transition: color 0.2s;
     }
-    .developer-name a:hover {
-        color: #00796b;
-    }
-    body.dark-mode .developer-name a:hover {
-        color: #00bfa5;
-    }
-
+    .developer-name a:hover, .developer-name a:focus { color: var(--primary-color); outline: none; }
     .developer-title {
       font-size: 1.1rem;
-      color: #00796b;
+      color: var(--primary-color);
       margin: 0.5rem 0 1.5rem 0;
-      font-style: italic; /* উক্তিটিকে একটু ভিন্ন স্টাইল দেওয়া হলো */
+      font-style: italic;
+      font-weight: 400;
+      border: none;
+      padding: 0;
     }
-    
     .bio {
       font-size: 1rem;
-      line-height: 1.6;
+      line-height: 1.7;
       color: #555;
       margin-bottom: 2rem;
     }
-    body.dark-mode .bio {
-        color: #ccc;
-    }
+    body.dark-mode .bio { color: #ccc; }
 
-    /* সোশ্যাল লিঙ্ক */
+    /* ==================== সোশ্যাল লিঙ্ক ==================== */
     .social-links a {
-        color: #004d40;
+        color: var(--primary-dark);
         text-decoration: none;
         font-size: 1.8rem;
         margin: 0 15px;
-        transition: color 0.2s;
+        transition: color 0.2s, transform 0.2s;
     }
-    body.dark-mode .social-links a {
-        color: #00bfa5;
+    body.dark-mode .social-links a { color: #00bfa5; }
+    .social-links a:hover, .social-links a:focus {
+        color: var(--primary-color);
+        transform: translateY(-3px);
+        outline: none;
     }
-    .social-links a:hover {
-        color: #00bfa5;
+    body.dark-mode .social-links a:hover, body.dark-mode .social-links a:focus { color: #fff; }
+
+    /* ==================== প্রকল্প সেকশন স্টাইল ==================== */
+    .section-title {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 2.5rem;
+        color: var(--primary-dark);
+        position: relative;
+        padding-bottom: 0.75rem;
     }
-    body.dark-mode .social-links a:hover {
-        color: #fff;
+    .section-title::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 4px;
+        background-color: var(--primary-color);
+        border-radius: 2px;
+    }
+    body.dark-mode .section-title { color: #00bfa5; }
+
+    .projects-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        justify-content: center; /* গ্রিড আইটেমকে মাঝখানে আনে যখন একটি মাত্র আইটেম থাকে */
+    }
+    .project-card {
+        background: var(--light-card-bg);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 15px var(--light-shadow);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    body.dark-mode .project-card { background: var(--dark-card-bg); }
+    .project-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 12px 25px var(--light-shadow);
+    }
+    .project-image-link {
+        display: block; /* লিঙ্কের জন্য কোনো অতিরিক্ত স্পেস যেন না থাকে */
+    }
+    .project-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-bottom: 1px solid #eee;
+        display: block; /* ছবির নিচে সামান্য গ্যাপ দূর করার জন্য */
+    }
+    body.dark-mode .project-card img {
+        border-bottom: 1px solid #333;
+    }
+    .project-content {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .project-content h3 {
+        font-size: 1.5rem;
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+    .project-content p {
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 1.5rem;
+        flex-grow: 1;
+        color: #555;
+    }
+    body.dark-mode .project-content p { color: #ccc; }
+    .project-links {
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    .project-links a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--primary-color);
+        border-radius: 5px;
+        transition: background-color 0.2s, color 0.2s;
+    }
+    .project-links a:hover, .project-links a:focus {
+        background-color: var(--primary-color);
+        color: white;
+        outline: none;
+    }
+
+    /* ==================== ফুটার ==================== */
+    footer {
+        text-align: center;
+        padding: 1.5rem;
+        background-color: var(--light-card-bg);
+        margin-top: 3rem;
+        font-size: 0.9rem;
+        border-top: 1px solid #e0e0e0;
+    }
+    body.dark-mode footer {
+        background-color: var(--dark-card-bg);
+        border-top: 1px solid #333;
+    }
+
+    /* ==================== রেসপন্সিভ ডিজাইন ==================== */
+    @media (max-width: 768px) {
+      header { padding: 0.8rem 1rem; }
+      header .logo { font-size: 1.3rem; }
+      .container { margin: 1.5rem auto; }
+      .developer-card { padding: 1.5rem; }
+      .developer-name { font-size: 1.8rem; }
+      .section-title { font-size: 1.8rem; }
+    }
+
+    @media (max-width: 480px) {
+        header .header-right { gap: 1rem; }
+        .developer-name { font-size: 1.6rem; }
+        .social-links a { font-size: 1.6rem; margin: 0 10px; }
+        .projects-grid {
+            grid-template-columns: 1fr;
+        }
     }
   </style>
 </head>
 <body>
+  <!-- ==================== Header ==================== -->
   <header>
-    <h1>About The Developer</h1>
-    <a href="home.html">হোম পেজে ফিরুন</a>
+    <a href="index.html" class="logo">ফারুক আহমেদ</a>
+    <div class="header-right">
+      <!-- Theme Switcher -->
+      <label class="theme-switch">
+        <input type="checkbox" id="theme-toggle">
+        <span class="slider"></span>
+      </label>
+      <a href="index.html" class="home-link">হোম</a>
+    </div>
   </header>
   
-  <div class="container">
-    <div class="developer-card">
-      <img src="dimage.png" alt="Developer's Photo" class="profile-pic">
+  <!-- ==================== Main Content ==================== -->
+  <main class="container">
+    <!-- Developer Card -->
+    <section class="developer-card">
+      <img src="dimage.png" alt="ডেভেলপার ফারুক আহমেদের ছবি" class="profile-pic">
       
-      <h2 class="developer-name">
-        <a href="https://www.facebook.com/share/16powf36eb/" target="_blank" rel="noopener noreferrer">Faruk Ahmed</a>
-      </h2>
+      <h1 class="developer-name">
+        <a href="https://www.facebook.com/share/16powf36eb/" target="_blank" rel="noopener noreferrer">ফারুক আহমেদ</a>
+      </h1>
       
-      <p class="developer-title">"প্রযুক্তির আলোয় দ্বীনের সৌন্দর্য ছড়িয়ে দেওয়ার একটি ক্ষুদ্র প্রয়াস।"</p>
+      <blockquote class="developer-title">"প্রযুক্তির আলোয় দ্বীনের সৌন্দর্য ছড়িয়ে দেওয়ার একটি ক্ষুদ্র প্রয়াস।"</blockquote>
       
       <p class="bio">
         আমি একজন আগ্রহী ওয়েব ডেভেলপার, যিনি পরিচ্ছন্ন, আধুনিক এবং ব্যবহারকারী-বান্ধব ওয়েব অ্যাপ্লিকেশন তৈরিতে বিশ্বাসী। DeenFlix প্রকল্পটি ইসলামিক জ্ঞানকে একটি সুন্দর এবং সহজলভ্য প্ল্যাটফর্মে পৌঁছে দেওয়ার একটি প্রচেষ্টা।
       </p>
       
       <div class="social-links">
-        <a href="#" target="_blank" title="GitHub">G</a>
-        <a href="#" target="_blank" title="LinkedIn">L</a>
-        <a href="#" target="_blank" title="Twitter">T</a>
+        <a href="https://github.com/faruk2003ahmed" target="_blank" rel="noopener noreferrer" title="GitHub"><i class="fab fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/faruk-ahmed-32027a37a?trk=contact-info" target="_blank" rel="noopener noreferrer" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+        <a href="https://x.com/Faruk0Ahmed?t=oCNcznkyWeHOTEaDHIOtPw&s=09" target="_blank" rel="noopener noreferrer" title="Twitter"><i class="fab fa-twitter"></i></a>
+        <a href="mailto:your.email@example.com" title="Email"><i class="fas fa-envelope"></i></a>
       </div>
-    </div>
-  </div>
+    </section>
 
+    <!-- Projects Section -->
+    <section class="projects-section">
+        <h2 class="section-title">আমার প্রকল্প</h2>
+        <div class="projects-grid">
+            <!-- Project 1 -->
+            <div class="project-card">
+                <!-- ছবিটি এখন একটি ক্লিকেবল লিঙ্ক -->
+                <a href="https://faruk2003ahmed.github.io/DeenFlix/" target="_blank" rel="noopener noreferrer" class="project-image-link">
+                    <img src="https://s.wordpress.com/mshots/v1/https://faruk2003ahmed.github.io/DeenFlix/?w=400" alt="DeenFlix Project Screenshot">
+                </a>
+                <div class="project-content">
+                  <h3>DeenFlix</h3>
+                  <p>ইসলামিক জ্ঞানকে একটি সুন্দর এবং সহজলভ্য প্ল্যাটফর্মে পৌঁছে দেওয়ার একটি প্রচেষ্টা।</p>
+                  <div class="project-links">
+                      <a href="https://faruk2003ahmed.github.io/DeenFlix/" target="_blank" rel="noopener noreferrer">লাইভ দেখুন <i class="fas fa-external-link-alt"></i></a>
+                      <a href="https://github.com/faruk2003ahmed/DeenFlix" target="_blank" rel="noopener noreferrer">সোর্স কোড <i class="fab fa-github"></i></a>
+                  </div>
+                </div>
+            </div>
+            
+            <!-- 
+              Project 2 (Placeholder) - এই অংশটি কমেন্ট করা আছে, তাই এটি দেখাবে না
+              
+              <div class="project-card">
+                  <a href="#" target="_blank" rel="noopener noreferrer" class="project-image-link">
+                      <img src="https://via.placeholder.com/400x250/333333/ffffff?text=Project+Two" alt="Project Two">
+                  </a>
+                  <div class="project-content">
+                    <h3>প্রজেক্ট দুই</h3>
+                    <p>আপনার দ্বিতীয় প্রজেক্টের একটি সংক্ষিপ্ত বর্ণনা এখানে দিন। এটি কী সমস্যার সমাধান করে?</p>
+                    <div class="project-links">
+                        <a href="#" target="_blank" rel="noopener noreferrer">লাইভ দেখুন <i class="fas fa-external-link-alt"></i></a>
+                        <a href="#" target="_blank" rel="noopener noreferrer">সোর্স কোড <i class="fab fa-github"></i></a>
+                    </div>
+                  </div>
+              </div> 
+            -->
+
+        </div>
+    </section>
+  </main>
+
+  <!-- ==================== Footer ==================== -->
+  <footer>
+    <p>© 2025 DeenFlix. সর্বস্বত্ব সংরক্ষিত।</p>
+  </footer>
+
+  <!-- Internal JavaScript -->
   <script>
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-    }
+    document.addEventListener('DOMContentLoaded', () => {
+        const themeToggle = document.getElementById('theme-toggle');
+
+        // 1. সিস্টেমের পছন্দ বা সেভ করা থিম চেক করুন
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // কোন থিমটি প্রয়োগ করতে হবে তা নির্ধারণ করুন
+        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+            document.body.classList.add('dark-mode');
+            if(themeToggle) themeToggle.checked = true;
+        } else {
+            document.body.classList.remove('dark-mode');
+            if(themeToggle) themeToggle.checked = false;
+        }
+
+        // 2. টগল সুইচে ইভেন্ট লিসেনার যোগ করুন
+        if(themeToggle) {
+            themeToggle.addEventListener('change', () => {
+                if (document.body.classList.contains('dark-mode')) {
+                    document.body.classList.remove('dark-mode');
+                    localStorage.setItem('theme', 'light'); // পছন্দ সেভ করুন
+                } else {
+                    document.body.classList.add('dark-mode');
+                    localStorage.setItem('theme', 'dark'); // পছন্দ সেভ করুন
+                }
+            });
+        }
+    });
   </script>
 </body>
 </html>
