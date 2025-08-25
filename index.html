@@ -20,17 +20,30 @@
     body.dark-mode nav { background: #102521; }
 
     #menu-icon{width:28px;height:28px;cursor:pointer;fill:#fff;display:none;z-index:1001}
-    header h1{margin:0;font-size:1.8rem;font-weight:600;border-right:2px solid rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;animation:blink-caret .75s step-end infinite;position:absolute;left:50%;transform:translateX(-50%)}
+    header h1{margin:0;font-size:1.8rem;font-weight:600;border-right:2px solid rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;animation:blink-caret .75s step-end infinite;position:absolute;left:50%;transform:translateX(-50%);transition: opacity 0.3s;}
     @keyframes blink-caret{from,to{border-color:transparent}50%{border-color:rgba(255,255,255,.75)}}
     nav a{color:#fff;margin:.2rem .3rem;text-decoration:none;font-weight:700;font-size:.9rem;padding:.5rem .8rem;border-radius:5px;transition:transform .1s ease-in-out,background-color .2s}
     nav a:hover{text-decoration:underline}
     nav a:active{transform:scale(.95);background-color:rgba(255,255,255,.1)}
     nav a svg{width:16px;height:16px;fill:#fff;margin-right:8px;vertical-align:middle}
-    #theme-toggle{cursor:pointer;width:24px;height:24px}
+    
+    .header-icons { display: flex; align-items: center; gap: 15px; position: relative; z-index: 2; }
+    #theme-toggle, #search-icon {cursor:pointer;width:24px;height:24px}
     #theme-toggle .sun-icon,#theme-toggle .moon-icon{width:100%;height:100%;fill:#fff}
+    #search-icon svg { width:100%; height:100%; fill:#fff; }
     .moon-icon{display:none}
     body.dark-mode .sun-icon{display:none}
     body.dark-mode .moon-icon{display:block}
+
+    /* --- নতুন সার্চ বার স্টাইল --- */
+    #search-container { position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); width: 0; opacity: 0; transition: width 0.4s ease, opacity 0.3s ease; display: flex; align-items: center; overflow: hidden; }
+    #search-container.active { width: calc(100% - 100px); max-width: 400px; opacity: 1; }
+    #search-input { width: 100%; background: rgba(255,255,255,0.2); border: none; padding: 8px 12px; border-radius: 20px; color: #fff; font-size: 1rem; outline: none; }
+    #search-input::placeholder { color: rgba(255,255,255,0.7); }
+    body.dark-mode #search-input { background: rgba(0,0,0,0.2); }
+    header.search-active h1 { opacity: 0; pointer-events: none; }
+    /* --- পরিবর্তনের শেষ --- */
+    
     main{padding:1.5rem; min-height: calc(100vh - 250px);}
     footer{text-align:center;padding:1.5rem;background-color:#e9ecef;margin-top:2rem}
     body.dark-mode footer{background-color:#1c1c1c}
@@ -87,6 +100,8 @@
     @media (max-width:768px){
       #menu-icon{display:block}
       header h1{font-size:1.5rem}
+      header.search-active #menu-icon { opacity: 0; }
+      #search-container.active { width: calc(100% - 60px); left: 45px; right: auto; }
       nav{position:fixed;top:0;left:0;width:auto;height:100vh;background:#004d40;box-shadow:2px 0 5px rgba(0,0,0,.2);flex-direction:column;justify-content:flex-start;padding:80px 1.5rem 0 1.5rem;transform:translateX(-100%);transition:transform .3s ease-in-out, background .3s ease-in-out;z-index:1000}
       nav.nav-open{transform:translateX(0)}
       nav a, .nav-extra-item{text-align:left;font-size:1rem;white-space:nowrap;width:auto;margin:0 0 10px;padding:.8rem 1.5rem;border-radius:8px;background:rgba(0,0,0,.15);opacity:0;transform:translateY(-15px);transition:opacity .3s ease-out,transform .3s ease-out, background-color .3s ease-out}
@@ -119,10 +134,25 @@
   </style>
 </head>
 <body>
-  <header>
-    <svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,6h18v2H3V6z M3,11h18v2H3v-2z M3,16h18v2H3v-2z"/></svg><h1 id="animated-title"></h1><div id="theme-toggle"><svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7z M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9z M2,12c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1s-0.45-1-1-1H3C2.45,11,2,11.45,2,12z M19,11h-1c-0.55,0-1,0.45-1,1s0.45,1,1,1h1c0.55,0,1-0.45,1-1S19.55,11,19,11z M11,2v1c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,19v1c0,0.55,0.45,1,1,1s1-0.45,1-1v-1c0-0.55-0.45-1-1-1S11,18.45,11,19z M5.64,4.22c-0.39-0.39-1.02-0.39-1.41,0c-0.39,0.39-0.39,1.02,0,1.41l1.06,1.06c0.39,0.39,1.02,0.39,1.41,0s0.39-1.02,0-1.41L5.64,4.22z M16.97,15.56c-0.39-0.39-1.02-0.39-1.41,0c-0.39,0.39-0.39,1.02,0,1.41l1.06,1.06c0.39,0.39,1.02,0.39,1.41,0s0.39-1.02,0-1.41L16.97,15.56z M4.22,16.97c0.39,0.39,1.02,0.39,1.41,0l1.06-1.06c0.39-0.39,0.39-1.02,0-1.41s-1.02-0.39-1.41,0L4.22,15.56C3.83,15.95,3.83,16.58,4.22,16.97z M18.38,5.64c0.39-0.39,1.02-0.39,1.41,0c0.39,0.39,0.39,1.02,0,1.41l-1.06,1.06c-0.39,0.39-1.02,0.39-1.41,0s-0.39-1.02,0-1.41L18.38,5.64z"/></svg><svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.3,4.84C11.32,4.46,10.22,4.5,9.23,4.9C6.41,6.1,4.94,8.96,5.96,11.77c0.8,2.18,2.89,3.67,5.2,3.84c3.08,0.23,5.83-1.8,6.59-4.6c0.3-1.12,0.1-2.28-0.56-3.26c-0.78-1.17-2.05-1.92-3.41-1.93C13.23,5.85,12.75,5.39,12.3,4.84z"/></svg></div>
+  <!-- হেডার সেকশন -->
+  <header id="page-header">
+    <svg id="menu-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,6h18v2H3V6z M3,11h18v2H3v-2z M3,16h18v2H3v-2z"/></svg>
+    <h1 id="animated-title"></h1>
+    <div id="search-container">
+        <input type="text" id="search-input" placeholder="ভিডিও খুঁজুন...">
+    </div>
+    <div class="header-icons">
+        <div id="theme-toggle">
+            <svg class="sun-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,7c-2.76,0-5,2.24-5,5s2.24,5,5,5s5-2.24,5-5S14.76,7,12,7z M12,9c1.65,0,3,1.35,3,3s-1.35,3-3,3s-3-1.35-3-3S10.35,9,12,9z M2,12c0,0.55,0.45,1,1,1h1c0.55,0,1-0.45,1-1s-0.45-1-1-1H3C2.45,11,2,11.45,2,12z M19,11h-1c-0.55,0-1,0.45-1,1s0.45,1,1,1h1c0.55,0,1-0.45,1-1S19.55,11,19,11z M11,2v1c0,0.55,0.45,1,1,1s1-0.45,1-1V2c0-0.55-0.45-1-1-1S11,1.45,11,2z M11,19v1c0,0.55,0.45,1,1,1s1-0.45,1-1v-1c0-0.55-0.45-1-1-1S11,18.45,11,19z M5.64,4.22c-0.39-0.39-1.02-0.39-1.41,0c-0.39,0.39-0.39,1.02,0,1.41l1.06,1.06c0.39,0.39,1.02,0.39,1.41,0s0.39-1.02,0-1.41L5.64,4.22z M16.97,15.56c-0.39-0.39-1.02-0.39-1.41,0c-0.39,0.39-0.39,1.02,0,1.41l1.06,1.06c0.39,0.39,1.02,0.39,1.41,0s0.39-1.02,0-1.41L16.97,15.56z M4.22,16.97c0.39,0.39,1.02,0.39,1.41,0l1.06-1.06c0.39-0.39,0.39-1.02,0-1.41s-1.02-0.39-1.41,0L4.22,15.56C3.83,15.95,3.83,16.58,4.22,16.97z M18.38,5.64c0.39-0.39,1.02-0.39,1.41,0c0.39,0.39,0.39,1.02,0,1.41l-1.06,1.06c-0.39,0.39-1.02,0.39-1.41,0s-0.39-1.02,0-1.41L18.38,5.64z"/></svg>
+            <svg class="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12.3,4.84C11.32,4.46,10.22,4.5,9.23,4.9C6.41,6.1,4.94,8.96,5.96,11.77c0.8,2.18,2.89,3.67,5.2,3.84c3.08,0.23,5.83-1.8,6.59-4.6c0.3-1.12,0.1-2.28-0.56-3.26c-0.78-1.17-2.05-1.92-3.41-1.93C13.23,5.85,12.75,5.39,12.3,4.84z"/></svg>
+        </div>
+        <div id="search-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </div>
+    </div>
   </header>
   
+  <!-- ন্যাভিগেশন মেনু -->
   <nav id="nav-menu">
       <a href="#" data-category="All">Home</a>
       <a href="#" data-category="Waz">Waz</a>
@@ -198,23 +228,23 @@
     const realVideoSection = document.getElementById('real-video-section');
     const floatingPlayerContainer=document.getElementById('floating-player-container'),floatingPlayerContent=document.getElementById('floating-player-content'),floatingPlayerCloseBtn=document.getElementById('floating-player-close'),mainGrid=document.getElementById("main-video-grid"),sectionTitle=document.getElementById("video-section-title"),navMenu=document.getElementById("nav-menu"),refreshButton=document.getElementById("refresh-button"),loadingSpinner=document.getElementById("loading-spinner"),installAppBtn=document.getElementById("install-app");
     
+    const pageHeader = document.getElementById('page-header');
+    const searchIcon = document.getElementById('search-icon');
+    const searchContainer = document.getElementById('search-container');
+    const searchInput = document.getElementById('search-input');
+
     const categoryInfo={All:"সকল ভিডিও",Waz:"📖 Waz",Nasheed:"🎵 Nasheed",Quran:"📘 Quran",Dua:"🙏 Dua", Saved:"🔖 সেভ করা ভিডিও"},reactionTypes=[{key:"barakallah",emoji:"❤️",text:"BarakAllah",color:"#e74c3c"},{key:"subhanallah",emoji:"🌟",text:"SubhanAllah",color:"#f39c12"},{key:"ameen",emoji:"🙌",text:"Ameen",color:"#00796b"}];
     
     const getStoredData=e=>JSON.parse(localStorage.getItem(e)||"{}"),setStoredData=(e,t)=>localStorage.setItem(e,JSON.stringify(t));function getVideoId(e){try{const t=new URL(e);return t.hostname.includes("youtu.be")?t.pathname.substring(1):t.searchParams.get("v")}catch(o){return null}}
 
     function createAndLaunchPlayer(options){const{target,videoId,dbId,startTime=0,shouldPlay=!1}=options;if(!target||!videoId)return;target.innerHTML='';const e=`player-${dbId}-${Date.now()}`,t=document.createElement('div');t.id=e,target.appendChild(t);try{new YT.Player(e,{videoId:videoId,playerVars:{autoplay:shouldPlay?1:0,rel:0},events:{onReady:e=>{e.target.seekTo(startTime,!0),shouldPlay&&e.target.playVideo(),activePlayer=e.target,activeDbId=dbId,isTransitioning=!1},onStateChange:onPlayerStateChange}})}catch(o){console.error("Player creation failed:",o),target.innerHTML=`<p style="color:red;">প্লেয়ার তৈরি করা যায়নি।</p>`,isTransitioning=!1}}
     
-    // --- পরিবর্তিত ফাংশন ---
     function playVideoInCard(video) {
         if (!video) return;
         cleanUpCurrentPlayer();
         const targetContainer = mainGrid.querySelector(`.video-card[data-videoid="${video.id}"] .thumbnail-container`);
         if (!targetContainer) return;
-
-        // লোডারটি প্রথমে যুক্ত করা হলো
         targetContainer.innerHTML = '<div class="video-loader"></div>';
-
-        // একটি সামান্য ডিলে যোগ করা হলো যাতে লোডারটি দেখানোর জন্য ব্রাউজার সময় পায়
         setTimeout(() => {
             createAndLaunchPlayer({
                 target: targetContainer,
@@ -223,9 +253,8 @@
                 startTime: 0,
                 shouldPlay: true
             });
-        }, 50); // ৫০ মিলিসেকেন্ড ডিলে
+        }, 50);
     }
-    // --- পরিবর্তনের শেষ ---
 
     function cleanUpCurrentPlayer(){if(activePlayer&&"function"==typeof activePlayer.destroy){const e=activeDbId,t=mainGrid.querySelector(`.video-card[data-videoid="${e}"] .thumbnail-container`);activePlayer.destroy(),t&&(t.innerHTML='<img src="'+`https://img.youtube.com/vi/${getVideoId(allVideosData.find(t=>t.id===e).link)}/hqdefault.jpg`+'" alt="Video thumbnail" loading="lazy"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>')}activePlayer=null,activeDbId=null,floatingPlayerContainer.classList.remove("visible"),floatingPlayerContent.innerHTML='',document.querySelectorAll(".thumbnail-placeholder").forEach(e=>{const t=e.closest(".video-card");t&&(e.parentElement.innerHTML=`<img src="https://img.youtube.com/vi/${getVideoId(allVideosData.find(o=>o.id===t.dataset.videoid).link)}/hqdefault.jpg" alt="Video thumbnail" loading="lazy"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`)})}
     
@@ -276,7 +305,7 @@
             
             const savedVideos = getStoredData('savedVideos');
             const saveItem = document.createElement('div'); saveItem.className = 'reaction-item save-item'; saveItem.title = 'ভিডিও সেভ করুন';
-            saveItem.innerHTML = `<button class="react-btn save-btn ${savedVideos[video.id] ? 'saved' : ''}"><svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2-2z"/></svg></button><div class="reaction-text">Save</div>`;
+            saveItem.innerHTML = `<button class="react-btn save-btn ${savedVideos[video.id] ? 'saved' : ''}"><svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2z"/></svg></button><div class="reaction-text">Save</div>`;
             saveItem.onclick = () => handleSave(video, videoCard);
             reactionSection.appendChild(saveItem);
 
@@ -290,6 +319,35 @@
 
     function loadMoreVideos(){if(isLoading)return;isLoading=!0,loadingSpinner.style.display="block";const e=videosDisplayedCount,t=e+videosPerLoad,o=videosToDisplayList.slice(e,t);if(0===o.length)return isLoading=!1,void(loadingSpinner.style.display="none");o.forEach(e=>createVideoCard(e)),videosDisplayedCount+=o.length,isLoading=!1,loadingSpinner.style.display="none"}
     
+    // --- সার্চ ফাংশন (সংশোধিত) ---
+    function performSearch() {
+        const query = searchInput.value.trim().toLowerCase();
+        if (!query) {
+            setupCategoryView(currentCategory);
+            return;
+        }
+        
+        cleanUpCurrentPlayer();
+        mainGrid.innerHTML = "";
+        videosDisplayedCount = 0;
+        
+        // --- এখানে পরিবর্তন করা হয়েছে ---
+        const searchResults = allVideosData.filter(video => 
+            video && video.title && video.title.toLowerCase().includes(query)
+        );
+
+        sectionTitle.innerText = `"${searchInput.value}" এর জন্য ফলাফল`;
+
+        if (searchResults.length === 0) {
+            mainGrid.innerHTML = `<p class="empty-category-message">আপনার সার্চের সাথে মিলে এমন কোনো ভিডিও পাওয়া যায়নি।</p>`;
+            return;
+        }
+
+        videosToDisplayList = searchResults;
+        loadMoreVideos();
+    }
+    // --- পরিবর্তনের শেষ ---
+
     function setupCategoryView(category) {
         currentCategory = category;
         cleanUpCurrentPlayer();
@@ -297,6 +355,12 @@
         videosDisplayedCount = 0;
         sectionTitle.innerText = categoryInfo[category] || "ভিডিওসমূহ";
         
+        if (searchContainer.classList.contains('active')) {
+            searchInput.value = '';
+            searchContainer.classList.remove('active');
+            pageHeader.classList.remove('search-active');
+        }
+
         if (category === 'Saved') {
             const savedVideos = getStoredData('savedVideos');
             const savedVideoIds = Object.keys(savedVideos);
@@ -359,8 +423,26 @@
     
     document.addEventListener("click",function(e){
         const t=navMenu.contains(e.target),o=menuIcon.contains(e.target);
-        navMenu.classList.contains("nav-open")&&!t&&!o&&navMenu.classList.remove("nav-open")
+        if (navMenu.classList.contains("nav-open")&&!t&&!o) {
+            navMenu.classList.remove("nav-open");
+        }
+        
+        const isSearchClick = searchContainer.contains(e.target) || searchIcon.contains(e.target);
+        if (searchContainer.classList.contains('active') && !isSearchClick) {
+             searchContainer.classList.remove('active');
+             pageHeader.classList.remove('search-active');
+        }
     });
+
+    searchIcon.addEventListener('click', (e) => {
+        e.stopPropagation();
+        searchContainer.classList.toggle('active');
+        pageHeader.classList.toggle('search-active');
+        if (searchContainer.classList.contains('active')) {
+            searchInput.focus();
+        }
+    });
+    searchInput.addEventListener('input', performSearch);
 
     document.addEventListener("DOMContentLoaded", () => {
         type();
