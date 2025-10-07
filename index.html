@@ -63,21 +63,31 @@
     .video-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:1.8rem}
     .video-card{border-radius:8px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,.1);background-color:#fff;transition:transform .3s,box-shadow .3s;display:flex;flex-direction:column}
     body.dark-mode .video-card{background-color:#2c2c2c;box-shadow:0 4px 12px rgba(0,0,0,.3)}
-    .video-card:hover:not(.is-loading){transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,.15)}
+    .video-card:hover{transform:translateY(-5px);box-shadow:0 8px 16px rgba(0,0,0,.15)}
     .skeleton {background:linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);background-size:200% 100%;animation:skeleton-shine 1.5s linear infinite;border-radius:4px}
     body.dark-mode .skeleton {background:linear-gradient(90deg, #3a3a3a 25%, #444 50%, #3a3a3a 75%);background-size:200% 100%}
     @keyframes skeleton-shine { to { background-position: -200% 0; } }
+    
+    /* Skeleton for initial page load */
     .video-card.is-loading .skeleton-image {padding-top:56.25%;width:100%;height:0}
     .video-card.is-loading .skeleton-content {padding:1rem}
     .video-card.is-loading .skeleton-title {height:24px;width:80%;margin-bottom:.5rem}
     .video-card.is-loading .skeleton-subtitle {height:16px;width:60%;margin-bottom:1rem}
+
     .thumbnail-container {position:relative;background-color:#000;cursor:pointer;width:100%;padding-top:56.25%;height:0}
+    
+    /* --- অপ্টিমাইজেশন: নতুন CSS --- */
+    .thumbnail-container .skeleton-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding-top: 0; z-index: 1; }
+    .thumbnail-container.is-loading img { opacity: 0; }
+    .thumbnail-container img { transition: opacity 0.3s ease-in; }
+    /* --- অপ্টিমাইজেশন শেষ --- */
+
     .thumbnail-container img {position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border:none;transition:opacity .2s}
     .thumbnail-container:hover img{opacity:.85}
-    .play-button-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;background-color:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:background-color .2s,transform .2s}
+    .play-button-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;background-color:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:background-color .2s,transform .2s; z-index: 2;}
     .play-button-overlay svg{width:30px;height:30px;fill:#fff}
     .thumbnail-container:hover .play-button-overlay{transform:translate(-50%,-50%) scale(1.1);background-color:rgba(231,76,60,.8)}
-    .thumbnail-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+    .thumbnail-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; z-index: 3;}
     .interaction-section{padding:1rem;flex-grow:1;display:flex;flex-direction:column;justify-content:space-between}
     .video-title{font-size:1.1rem;font-weight:600;margin:0 0 .25rem 0;line-height:1.4;min-height:46px}
     .video-meta-container{display:flex; align-items:center; gap:8px; font-size:.8rem;font-weight:600;margin-bottom:.75rem;}
@@ -262,7 +272,7 @@
         }, 50);
     }
 
-    function cleanUpCurrentPlayer(){if(activePlayer&&"function"==typeof activePlayer.destroy){const e=activeDbId,t=mainGrid.querySelector(`.video-card[data-videoid="${e}"] .thumbnail-container`);activePlayer.destroy(),t&&(t.innerHTML='<img src="'+`https://img.youtube.com/vi/${getVideoId(allVideosData.find(t=>t.id===e).link)}/hqdefault.jpg`+'" alt="Video thumbnail" loading="lazy"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>')}activePlayer=null,activeDbId=null,floatingPlayerContainer.classList.remove("visible"),floatingPlayerContent.innerHTML='',document.querySelectorAll(".thumbnail-placeholder").forEach(e=>{const t=e.closest(".video-card");t&&(e.parentElement.innerHTML=`<img src="https://img.youtube.com/vi/${getVideoId(allVideosData.find(o=>o.id===t.dataset.videoid).link)}/hqdefault.jpg" alt="Video thumbnail" loading="lazy"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`)})}
+    function cleanUpCurrentPlayer(){if(activePlayer&&"function"==typeof activePlayer.destroy){const e=activeDbId,t=mainGrid.querySelector(`.video-card[data-videoid="${e}"] .thumbnail-container`);activePlayer.destroy(); if(t){const video = allVideosData.find(v => v.id === e); if(video){const youtubeId=getVideoId(video.link);t.innerHTML=`<div class="skeleton skeleton-image"></div><img src="https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg" alt="${video.title}" loading="lazy" onload="this.parentElement.classList.remove('is-loading')"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`;t.classList.add('is-loading')}};}activePlayer=null,activeDbId=null,floatingPlayerContainer.classList.remove("visible"),floatingPlayerContent.innerHTML='',document.querySelectorAll(".thumbnail-placeholder").forEach(e=>{const t=e.closest(".video-card");if(t){const video=allVideosData.find(o=>o.id==t.dataset.videoid);if(video){const o=getVideoId(video.link);e.parentElement.innerHTML=`<div class="skeleton skeleton-image"></div><img src="https://img.youtube.com/vi/${o}/hqdefault.jpg" alt="${video.title}" loading="lazy" onload="this.parentElement.classList.remove('is-loading')"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`;e.parentElement.classList.add("is-loading")}}})}
     
     function onPlayerStateChange(e){e.data===YT.PlayerState.ENDED&&cleanUpCurrentPlayer()}
     
@@ -293,43 +303,65 @@
         setStoredData('savedVideos', savedVideos);
     }
     
-    async function createVideoCard(video) {
-        const youtubeId = getVideoId(video.link); if (!youtubeId) return;
-        const videoCard = document.createElement('div'); videoCard.className = 'video-card is-loading'; videoCard.dataset.videoid = video.id;
-        videoCard.innerHTML = `<div class="skeleton skeleton-image"></div><div class="skeleton-content"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-subtitle"></div></div>`;
-        mainGrid.appendChild(videoCard);
+    // --- অপ্টিমাইজেশন: createVideoCard ফাংশনটি দ্রুততর করা হয়েছে ---
+    function createVideoCard(video) {
+        const youtubeId = getVideoId(video.link);
+        if (!youtubeId) return;
+
+        const videoCard = document.createElement('div');
+        videoCard.className = 'video-card';
+        videoCard.dataset.videoid = video.id;
+
+        const title = video.title || "ভিডিও টাইটেল পাওয়া যায়নি";
+        const imgSrc = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
         
-        const imageLoadPromise = new Promise((resolve, reject) => { const img = new Image(); img.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`; img.onload = () => resolve(img.src); img.onerror = reject; });
-        try {
-            const imgSrc = await imageLoadPromise; const title = video.title || "ভিডিও টাইটেল পাওয়া যায়নি"; const realContent = document.createElement('div'); realContent.className = 'real-content';
-            const thumbnailContainer = document.createElement('div'); thumbnailContainer.className = 'thumbnail-container'; thumbnailContainer.innerHTML = `<img src="${imgSrc}" alt="${title}" loading="lazy"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`;
-            const interactionSection = document.createElement('div'); interactionSection.className = 'interaction-section'; 
-            interactionSection.innerHTML = `
+        // থাম্বনেইল এবং ইন্টারেকশন সেকশনের জন্য HTML তৈরি করা
+        const thumbnailHTML = `
+            <div class="thumbnail-container is-loading">
+                <div class="skeleton skeleton-image"></div>
+                <img src="${imgSrc}" alt="${title}" loading="lazy" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading')">
+                <div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+            </div>`;
+
+        const interactionHTML = `
+            <div class="interaction-section">
                 <h3 class="video-title">${title}</h3>
                 <div class="video-meta-container">
                     <span class="video-category-link">${categoryInfo[video.category] || video.category}</span>
                     <span>•</span>
                     <span class="video-channel-link">${video.channel || "Unknown Channel"}</span>
                 </div>
-                <div class="reaction-section"></div>`;
-            
-            const reactionSection = interactionSection.querySelector('.reaction-section'); const userReactions = getStoredData('userReactions');
-            reactionTypes.forEach(type => { const item = document.createElement('div'); item.className = 'reaction-item'; item.dataset.reactkey = type.key; item.innerHTML = `<button class="react-btn ${userReactions[video.id] === type.key ? 'reacted' : ''}">${type.emoji}</button><div class="reaction-text" style="color:${type.color};">${type.text}</div><div class="reaction-count">(${(video.reactions && video.reactions[type.key]) || 0})</div>`; item.onclick = () => handleReaction(video, type, item); reactionSection.appendChild(item); });
-            
-            const savedVideos = getStoredData('savedVideos');
-            const saveItem = document.createElement('div'); saveItem.className = 'reaction-item save-item'; saveItem.title = 'ভিডিও সেভ করুন';
-            saveItem.innerHTML = `<button class="react-btn save-btn ${savedVideos[video.id] ? 'saved' : ''}"><svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2z"/></svg></button><div class="reaction-text">Save</div>`;
-            saveItem.onclick = () => handleSave(video, videoCard);
-            reactionSection.appendChild(saveItem);
+                <div class="reaction-section"></div>
+            </div>`;
 
-            realContent.append(thumbnailContainer, interactionSection); videoCard.innerHTML = ''; videoCard.appendChild(realContent);
-            
-            thumbnailContainer.addEventListener('click', () => playVideoInCard(video));
-            interactionSection.querySelector('.video-category-link').addEventListener('click', (e) => { e.stopPropagation(); setupCategoryView(video.category); });
-            interactionSection.querySelector('.video-channel-link').addEventListener('click', (e) => { e.stopPropagation(); setupChannelView(video.channel); });
-            
-            videoCard.classList.remove('is-loading');
-        } catch (error) { console.error('কার্ড কন্টেন্ট লোড হতে ব্যর্থ:', youtubeId, error); videoCard.remove(); }
+        videoCard.innerHTML = thumbnailHTML + interactionHTML;
+        mainGrid.appendChild(videoCard);
+
+        // রিঅ্যাকশন বাটনগুলো তৈরি ও ইভেন্ট যুক্ত করা
+        const reactionSection = videoCard.querySelector('.reaction-section');
+        const userReactions = getStoredData('userReactions');
+        reactionTypes.forEach(type => {
+            const item = document.createElement('div');
+            item.className = 'reaction-item';
+            item.dataset.reactkey = type.key;
+            item.innerHTML = `<button class="react-btn ${userReactions[video.id] === type.key ? 'reacted' : ''}">${type.emoji}</button><div class="reaction-text" style="color:${type.color};">${type.text}</div><div class="reaction-count">(${(video.reactions && video.reactions[type.key]) || 0})</div>`;
+            item.onclick = () => handleReaction(video, type, item);
+            reactionSection.appendChild(item);
+        });
+
+        // সেভ বাটন তৈরি ও ইভেন্ট যুক্ত করা
+        const savedVideos = getStoredData('savedVideos');
+        const saveItem = document.createElement('div');
+        saveItem.className = 'reaction-item save-item';
+        saveItem.title = 'ভিডিও সেভ করুন';
+        saveItem.innerHTML = `<button class="react-btn save-btn ${savedVideos[video.id] ? 'saved' : ''}"><svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-2 .9-2 2v16l7-3 7 3V5c0-1.1-.9-2-2z"/></svg></button><div class="reaction-text">Save</div>`;
+        saveItem.onclick = () => handleSave(video, videoCard);
+        reactionSection.appendChild(saveItem);
+        
+        // অন্যান্য ক্লিক ইভেন্ট যুক্ত করা
+        videoCard.querySelector('.thumbnail-container').addEventListener('click', () => playVideoInCard(video));
+        videoCard.querySelector('.video-category-link').addEventListener('click', (e) => { e.stopPropagation(); setupCategoryView(video.category); });
+        videoCard.querySelector('.video-channel-link').addEventListener('click', (e) => { e.stopPropagation(); setupChannelView(video.channel); });
     }
 
     function loadMoreVideos(){if(isLoading)return;isLoading=!0,loadingSpinner.style.display="block";const e=videosDisplayedCount,t=e+videosPerLoad,o=videosToDisplayList.slice(e,t);if(0===o.length)return isLoading=!1,void(loadingSpinner.style.display="none");o.forEach(e=>createVideoCard(e)),videosDisplayedCount+=o.length,isLoading=!1,loadingSpinner.style.display="none"}
@@ -362,7 +394,7 @@
 
     function setupChannelView(channelName) {
         if (!channelName) return;
-        currentCategory = null; // কোনো ক্যাটাগরি সিলেক্টেড নেই
+        currentCategory = null; 
         cleanUpCurrentPlayer();
         mainGrid.innerHTML = "";
         videosDisplayedCount = 0;
@@ -380,7 +412,7 @@
             mainGrid.innerHTML = `<p class="empty-category-message">এই চ্যানেলে কোনো ভিডিও পাওয়া যায়নি।</p>`;
             return;
         }
-        videosToDisplayList = sourceVideos.slice(); // চ্যানেলের ভিডিওগুলো ক্রম অনুযায়ী রাখতে পারি, তাই random সর্ট করা হয়নি
+        videosToDisplayList = sourceVideos.slice(); 
         loadMoreVideos();
     }
     
