@@ -17,7 +17,7 @@
     nav{display:flex;justify-content:center;background:#004d40;padding:.5rem; transition: background .3s;}
     
     body.dark-mode header { background: linear-gradient(to right, #102521, #004d40); }
-    body.dark-mode nav { background: #102521; }
+    body.dark-mode nav { background: #10211e; }
 
     #menu-icon{width:28px;height:28px;cursor:pointer;fill:#fff;display:none;z-index:1001}
     header h1{margin:0;font-size:1.8rem;font-weight:600;border-right:2px solid rgba(255,255,255,.75);white-space:nowrap;overflow:hidden;animation:blink-caret .75s step-end infinite;position:absolute;left:50%;transform:translateX(-50%);transition: opacity 0.3s;}
@@ -68,7 +68,6 @@
     body.dark-mode .skeleton {background:linear-gradient(90deg, #3a3a3a 25%, #444 50%, #3a3a3a 75%);background-size:200% 100%}
     @keyframes skeleton-shine { to { background-position: -200% 0; } }
     
-    /* Skeleton for initial page load */
     .video-card.is-loading .skeleton-image {padding-top:56.25%;width:100%;height:0}
     .video-card.is-loading .skeleton-content {padding:1rem}
     .video-card.is-loading .skeleton-title {height:24px;width:80%;margin-bottom:.5rem}
@@ -76,13 +75,14 @@
 
     .thumbnail-container {position:relative;background-color:#000;cursor:pointer;width:100%;padding-top:56.25%;height:0}
     
-    /* --- অপ্টিমাইজেশন: নতুন CSS --- */
-    .thumbnail-container .skeleton-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding-top: 0; z-index: 1; }
+    /* --- ★★★★★ Lazy Loading এর জন্য CSS পরিবর্তন ★★★★★ --- */
+    .thumbnail-container .skeleton-image { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding-top: 0; z-index: 1; transition: opacity 0.4s ease-out; }
     .thumbnail-container.is-loading img { opacity: 0; }
-    .thumbnail-container img { transition: opacity 0.3s ease-in; }
-    /* --- অপ্টিমাইজেশন শেষ --- */
+    .thumbnail-container:not(.is-loading) .skeleton-image { opacity: 0; pointer-events: none; }
+    .thumbnail-container img { transition: opacity 0.4s ease-in; opacity: 1;}
+    .thumbnail-container img[src*="data:image"] { opacity: 0; } /* placeholder ইমেজ হাইড করার জন্য */
 
-    .thumbnail-container img {position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border:none;transition:opacity .2s}
+    .thumbnail-container img {position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border:none}
     .thumbnail-container:hover img{opacity:.85}
     .play-button-overlay{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;background-color:rgba(0,0,0,.6);border-radius:50%;display:flex;align-items:center;justify-content:center;pointer-events:none;transition:background-color .2s,transform .2s; z-index: 2;}
     .play-button-overlay svg{width:30px;height:30px;fill:#fff}
@@ -230,8 +230,6 @@
   </div>
   
   <script src="https://www.youtube.com/iframe_api"></script>
-  <!-- videos.js থেকে ডেটা লোড করার জন্য এই লাইনটি যোগ করা হয়েছে -->
-  <!-- গুরুত্বপূর্ণ: নিশ্চিত করুন আপনার videos.js ফাইলের প্রতিটি ভিডিও অবজেক্টে একটি 'channel' প্রপার্টি আছে। যেমন: { id: 1, title: '...', category: '...', channel: 'চ্যানেলের নাম' } -->
   <script src="videos.js"></script>
 
   <script>
@@ -239,6 +237,7 @@
     let activePlayer = null;
     let activeDbId = null; 
     let deferredPrompt; 
+    let lazyLoadObserver; // ★★★ Lazy Loading এর জন্য Observer ভ্যারিয়েবল
 
     const initialLoaderContainer = document.getElementById('initial-loader-container');
     const realVideoSection = document.getElementById('real-video-section');
@@ -271,9 +270,10 @@
             });
         }, 50);
     }
-
-    function cleanUpCurrentPlayer(){if(activePlayer&&"function"==typeof activePlayer.destroy){const e=activeDbId,t=mainGrid.querySelector(`.video-card[data-videoid="${e}"] .thumbnail-container`);activePlayer.destroy(); if(t){const video = allVideosData.find(v => v.id === e); if(video){const youtubeId=getVideoId(video.link);t.innerHTML=`<div class="skeleton skeleton-image"></div><img src="https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg" alt="${video.title}" loading="lazy" onload="this.parentElement.classList.remove('is-loading')"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`;t.classList.add('is-loading')}};}activePlayer=null,activeDbId=null,floatingPlayerContainer.classList.remove("visible"),floatingPlayerContent.innerHTML='',document.querySelectorAll(".thumbnail-placeholder").forEach(e=>{const t=e.closest(".video-card");if(t){const video=allVideosData.find(o=>o.id==t.dataset.videoid);if(video){const o=getVideoId(video.link);e.parentElement.innerHTML=`<div class="skeleton skeleton-image"></div><img src="https://img.youtube.com/vi/${o}/hqdefault.jpg" alt="${video.title}" loading="lazy" onload="this.parentElement.classList.remove('is-loading')"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>`;e.parentElement.classList.add("is-loading")}}})}
     
+    // ★★★ আপনার আসল cleanUpCurrentPlayer ফাংশনটি এখানে অপরিবর্তিত আছে ★★★
+    function cleanUpCurrentPlayer(){if(activePlayer&&"function"==typeof activePlayer.destroy){const e=activeDbId,t=mainGrid.querySelector(`.video-card[data-videoid="${e}"]`);activePlayer.destroy(); if(t){const o=t.querySelector(".thumbnail-container"),a=allVideosData.find(l=>l.id===e);if(a){const n=getVideoId(a.link);o.innerHTML=`<div class="skeleton skeleton-image"></div><img data-src="https://img.youtube.com/vi/${n}/hqdefault.jpg" alt="${a.title}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"><div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></svg></div>`,lazyLoadObserver.observe(t)}}activePlayer=null,activeDbId=null,floatingPlayerContainer.classList.remove("visible"),floatingPlayerContent.innerHTML=""}}
+
     function onPlayerStateChange(e){e.data===YT.PlayerState.ENDED&&cleanUpCurrentPlayer()}
     
     function handleFloatingPlayer(){if(isTransitioning||!activePlayer||!activeDbId)return;const e=mainGrid.querySelector(`.video-card[data-videoid="${activeDbId}"]`);if(!e)return;const t=e.querySelector(".thumbnail-container"),o=t.getBoundingClientRect(),a=o.top<window.innerHeight&&o.bottom>0,n=activePlayer.getVideoData().video_id,r=activePlayer.getCurrentTime(),i=activePlayer.getPlayerState()===YT.PlayerState.PLAYING;!a&&!floatingPlayerContainer.classList.contains("visible")?(isTransitioning=!0,activePlayer.destroy(),activePlayer=null,t.innerHTML='<div class="thumbnail-placeholder">▶️ এখন চলছে...</div>',floatingPlayerContainer.classList.add("visible"),createAndLaunchPlayer({target:floatingPlayerContent,videoId:n,dbId:activeDbId,startTime:r,shouldPlay:i})):a&&floatingPlayerContainer.classList.contains("visible")&&(isTransitioning=!0,activePlayer.destroy(),activePlayer=null,floatingPlayerContainer.classList.remove("visible"),floatingPlayerContent.innerHTML='',createAndLaunchPlayer({target:t,videoId:n,dbId:activeDbId,startTime:r,shouldPlay:i}))}
@@ -303,6 +303,7 @@
         setStoredData('savedVideos', savedVideos);
     }
     
+    // --- ★★★★★ নতুন এবং অপ্টিমাইজড createVideoCard ফাংশন (Lazy Loading সহ) ★★★★★ ---
     function createVideoCard(video) {
         const youtubeId = getVideoId(video.link);
         if (!youtubeId) return;
@@ -312,16 +313,16 @@
         videoCard.dataset.videoid = video.id;
 
         const title = video.title || "ভিডিও টাইটেল পাওয়া যায়নি";
-        const imgSrc = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+        const highQualitySrc = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
         
-        const thumbnailHTML = `
+        // লক্ষ্য করুন: এখন src এর পরিবর্তে data-src ব্যবহার করা হচ্ছে
+        videoCard.innerHTML = `
             <div class="thumbnail-container is-loading">
                 <div class="skeleton skeleton-image"></div>
-                <img src="${imgSrc}" alt="${title}" loading="lazy" onload="this.parentElement.classList.remove('is-loading')" onerror="this.parentElement.classList.remove('is-loading')">
+                <img data-src="${highQualitySrc}" alt="${title}" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7">
                 <div class="play-button-overlay"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
-            </div>`;
-
-        const interactionHTML = `
+                <div class="thumbnail-placeholder hidden">ছবি লোড হয়নি</div>
+            </div>
             <div class="interaction-section">
                 <h3 class="video-title">${title}</h3>
                 <div class="video-meta-container">
@@ -332,9 +333,12 @@
                 <div class="reaction-section"></div>
             </div>`;
 
-        videoCard.innerHTML = thumbnailHTML + interactionHTML;
         mainGrid.appendChild(videoCard);
 
+        if (lazyLoadObserver) {
+            lazyLoadObserver.observe(videoCard);
+        }
+        
         const reactionSection = videoCard.querySelector('.reaction-section');
         const userReactions = getStoredData('userReactions');
         reactionTypes.forEach(type => {
@@ -359,33 +363,7 @@
         videoCard.querySelector('.video-channel-link').addEventListener('click', (e) => { e.stopPropagation(); setupChannelView(video.channel); });
     }
 
-    function loadMoreVideos() {
-        if (isLoading) return;
-        isLoading = true;
-        loadingSpinner.style.display = "block";
-        document.body.style.overflow = 'hidden'; // ভিডিও লোড হওয়ার সময় স্ক্রোল লক করা হলো
-
-        // একটি সংক্ষিপ্ত সময় দেওয়া হলো যাতে UI আপডেট হতে পারে (স্পিনার দেখানো, স্ক্রোল লক)
-        setTimeout(() => {
-            const startIndex = videosDisplayedCount;
-            const endIndex = startIndex + videosPerLoad;
-            const videosToLoad = videosToDisplayList.slice(startIndex, endIndex);
-            
-            if (videosToLoad.length === 0) {
-                isLoading = false;
-                loadingSpinner.style.display = "none";
-                document.body.style.overflow = 'auto'; // যদি কোনো ভিডিও না থাকে তবে স্ক্রোল আনলক করা হলো
-                return;
-            }
-
-            videosToLoad.forEach(video => createVideoCard(video));
-            videosDisplayedCount += videosToLoad.length;
-
-            isLoading = false;
-            loadingSpinner.style.display = "none";
-            document.body.style.overflow = 'auto'; // ভিডিও লোড শেষে স্ক্রোল আবার চালু করা হলো
-        }, 50); 
-    }
+    function loadMoreVideos(){if(isLoading)return;isLoading=!0,loadingSpinner.style.display="block";const e=videosDisplayedCount,t=e+videosPerLoad,o=videosToDisplayList.slice(e,t);if(0===o.length)return isLoading=!1,void(loadingSpinner.style.display="none");o.forEach(e=>createVideoCard(e)),videosDisplayedCount+=o.length,isLoading=!1,loadingSpinner.style.display="none"}
     
     function performSearch() {
         const query = searchInput.value.trim().toLowerCase();
@@ -536,6 +514,42 @@
     document.addEventListener("DOMContentLoaded", () => {
         type();
 
+        // --- ★★★★★ Lazy Loading এর জন্য Intersection Observer সেটআপ ★★★★★ ---
+        const observerOptions = {
+            root: null, 
+            rootMargin: '200px', // স্ক্রিনে আসার ২০০ পিক্সেল আগে থেকেই লোড শুরু হবে
+            threshold: 0.01 
+        };
+
+        lazyLoadObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const card = entry.target;
+                    const container = card.querySelector('.thumbnail-container');
+                    const img = container.querySelector('img');
+                    const placeholder = container.querySelector('.thumbnail-placeholder');
+                    const highQualitySrc = img.dataset.src;
+                    
+                    if (!highQualitySrc) return;
+
+                    const mediumQualitySrc = highQualitySrc.replace('hqdefault.jpg', 'mqdefault.jpg');
+
+                    img.src = highQualitySrc;
+
+                    img.onload = () => { container.classList.remove('is-loading'); };
+                    img.onerror = () => {
+                        if (img.src === highQualitySrc) { img.src = mediumQualitySrc; } 
+                        else {
+                            container.classList.remove('is-loading');
+                            img.classList.add('hidden');
+                            placeholder.classList.remove('hidden');
+                        }
+                    };
+                    observer.unobserve(card);
+                }
+            });
+        }, observerOptions);
+
         if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
             if (installAppBtn) installAppBtn.style.display = 'none';
         }
@@ -561,9 +575,7 @@
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') {
-                    installAppBtn.style.display = 'none';
-                }
+                if (outcome === 'accepted') { installAppBtn.style.display = 'none'; }
                 deferredPrompt = null;
             } else {
                 alert('অ্যাপটি শুধুমাত্র একটি নিরাপদ (HTTPS) কানেকশনে এবং সাপোর্টেড ব্রাউজারে (যেমন Chrome, Edge) ইনস্টল করা যাবে।');
@@ -571,9 +583,7 @@
         });
     }
 
-    window.addEventListener('appinstalled', () => {
-      deferredPrompt = null;
-    });
+    window.addEventListener('appinstalled', () => { deferredPrompt = null; });
   </script>
 </body>
 </html>
