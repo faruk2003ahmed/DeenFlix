@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DeenFlix - সম্পূর্ণ ভিডিও ম্যানেজার</title>
+  
+  <style>
+    :root {
+      --primary: #00796b; --primary-dark: #004d40; --success: #28a745; --danger: #e74c3c;
+      --danger-hover: #c0392b; --info: #007bff; --warning: #ffc107; --bg: #f4f7f6; 
+      --white: #ffffff; --gray: #e9ecef; --text-dark: #333; --success-light: #d4edda;
+    }
+    * { box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Tahoma, sans-serif; margin: 0; padding: 1.5rem; background-color: var(--bg); color: var(--text-dark); line-height: 1.6; }
+    .container { max-width: 900px; margin: auto; background: var(--white); padding: 1.5rem 2rem; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    h1, h2 { text-align: center; color: var(--primary); margin-bottom: 1.5rem; }
+    h1 { font-size: 2.2rem; margin-bottom: 2rem;}
+    h2 { font-size: 1.6rem; border-top: 2px solid var(--gray); padding-top: 1.5rem; margin-top: 2.5rem;}
+    .form-section { display: flex; flex-direction: column; gap: 1rem; }
+    label { font-weight: 600; display: block; margin-bottom: 5px; }
+    input[type="text"], input[type="url"], select { padding: 0.7rem; font-size: 1rem; border: 1px solid #ccc; border-radius: 5px; width: 100%; }
+    button { background-color: var(--primary); color: white; font-size: 1rem; padding: 0.8rem 1.2rem; border: none; border-radius: 5px; cursor: pointer; transition: background-color 0.2s; font-weight: bold; display: block; width: 100%; margin-top: 10px; }
+    button:hover { background-color: var(--primary-dark); }
+    button:disabled { background-color: #aaa; cursor: not-allowed; }
+    textarea { width: 100%; height: 400px; font-family: monospace; font-size: 0.9rem; border: 1px solid #ccc; border-radius: 5px; margin-top: 1rem; padding: 10px; }
+    .instructions { background: #e0f2f1; border-left: 5px solid var(--primary); padding: 15px; border-radius: 5px; margin: 1.5rem 0; color: #004d40; }
+    .btn-group { display: flex; gap: 10px; justify-content: flex-end; }
+    .copy-btn, .download-btn { width: auto; padding: 8px 15px; margin-top: 10px; font-size: 0.9rem; }
+    .copy-btn { background: var(--success); }
+    .download-btn { background: var(--info); }
+    .link-status { font-size: 0.85rem; font-weight: bold; margin-top: 5px; min-height: 18px; }
+    .link-status.success { color: var(--success); } .link-status.error { color: var(--danger); } .link-status.loading { color: var(--info); }
+    table { width: 100%; border-collapse: collapse; margin-top: 1.5rem; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #ddd; vertical-align: middle; }
+    th { background-color: #e0f2f1; font-weight: 600; }
+    .delete-btn { background-color: var(--danger); padding: 0.5rem 0.8rem; }
+    .delete-btn:hover { background-color: var(--danger-hover); }
+    .loading-indicator { text-align: center; margin-top: 1rem; font-weight: 500; color: #555; display: none; }
+    .results-div { border: 1px solid #ddd; border-radius: 5px; padding: 1rem; margin-top: 1rem; background: #f8f9fa; min-height: 50px; }
+    .results-div ul { padding-left: 20px; margin: 0; }
+    .results-div .summary { font-weight: bold; color: var(--primary); text-align: center; background: var(--success-light); padding: 10px; border-radius: 5px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>DeenFlix - সম্পূর্ণ ভিডিও ম্যানেজার</h1>
+
+    <!-- ১. চ্যানেল ম্যানেজমেন্ট সেকশন -->
+    <div id="channel-management-section">
+      <h2>📢 চ্যানেল ম্যানেজমেন্ট</h2>
+      <form id="add-channel-form" class="form-section" style="padding-bottom: 2rem; border-bottom: 2px dashed var(--gray);">
+        <div>
+          <label for="channel-video-link">চ্যানেলের যেকোনো একটি ভিডিও লিংক দিন:</label>
+          <input type="url" id="channel-video-link" placeholder="ভিডিও লিংক পেস্ট করলে চ্যানেল যুক্ত হবে" required>
+        </div>
+        <div>
+          <label for="new-channel-category">ডিফল্ট ক্যাটাগরি</label>
+          <select id="new-channel-category" required>
+            <option value="">-- নির্বাচন করুন --</option>
+            <option value="Waz">Waz</option> <option value="Quran">Quran</option> <option value="Nasheed">Nasheed</option> <option value="Dua">Dua</option>
+          </select>
+        </div>
+        <button type="submit" id="add-channel-btn">➕ চ্যানেল যোগ করুন</button>
+      </form>
+      <h3 style="text-align: center; margin-top: 2rem;">সাবস্ক্রাইব করা চ্যানেল তালিকা</h3>
+      <table id="channels-table">
+        <thead><tr><th>চ্যানেলের নাম</th><th>ক্যাটাগরি</th><th>অ্যাকশন</th></tr></thead>
+        <tbody><!-- JS দিয়ে তালিকা আসবে --></tbody>
+      </table>
+    </div>
+    
+    <!-- ২. সিঙ্গেল ভিডিও যোগ করার فرم -->
+    <form id="single-video-form" class="form-section">
+      <h2>✍️ সিঙ্গেল ভিডিও যোগ করুন</h2>
+      <div>
+        <label for="video-link">ইউটিউব ভিডিও লিংক</label>
+        <input type="url" id="video-link" placeholder="এখানে ইউটিউব লিংক পেস্ট করুন" required>
+        <div id="link-status" class="link-status"></div>
+      </div>
+      <div>
+        <label for="video-title">ভিডিওর শিরোনাম (স্বয়ংক্রিয়ভাবে আসবে)</label>
+        <input type="text" id="video-title" placeholder="লিংক পেস্ট করার পর এখানে শিরোনাম আসবে" required>
+      </div>
+      <div>
+        <label for="video-category">ক্যাটাগরি</label>
+        <select id="video-category" required>
+            <option value="">-- নির্বাচন করুন --</option>
+            <option value="Waz">Waz</option> <option value="Quran">Quran</option> <option value="Nasheed">Nasheed</option> <option value="Dua">Dua</option>
+        </select>
+      </div>
+      <button type="submit" id="single-video-submit-btn" disabled>➕ ভিডিও যোগ করুন</button>
+    </form>
+
+    <!-- ৩. চ্যানেল থেকে আপডেট করার সেকশন -->
+    <div>
+      <h2>🔄 নতুন ভিডিও আনুন</h2>
+      <p style="text-align: center;">নিচের বাটনে ক্লিক করলে আপনার সেভ করা চ্যানেল তালিকা থেকে নতুন ভিডিও ও শর্টস খোঁজা হবে।</p>
+      <button id="updateAllChannelsBtn">সকল চ্যানেল থেকে নতুন ভিডিও আনুন</button>
+      <div id="updateAllLoadingIndicator" class="loading-indicator">
+           <span>🔄 চ্যানেলগুলো আপডেট করা হচ্ছে... অনুগ্রহ করে অপেক্ষা করুন। এটি কয়েক মিনিট সময় নিতে পারে।</span>
+      </div>
+      <div id="updateAllResults" class="results-div" style="display:none;"></div>
+    </div>
+    
+    <!-- ৪. জেনারেট হওয়া কোড সেকশন -->
+    <div id="output-section" style="display:none;">
+        <h2>✅ জেনারেট হওয়া কোড</h2>
+        <div class="instructions">
+            <strong>নির্দেশনা:</strong> প্রক্রিয়া সম্পন্ন! নিচের "ফাইল ডাউনলোড করুন" বাটনে ক্লিক করে <strong><code>videos.js</code></strong> ফাইলটি নামিয়ে নিন এবং আপনার প্রজেক্টের পুরনো ফাইলটি বদলে দিন। আপনি চাইলে কোড কপিও করতে পারেন।
+        </div>
+        <textarea id="output-code" readonly></textarea>
+        <div class="btn-group">
+          <button id="copy-btn" class="copy-btn">📝 কোড কপি করুন</button>
+          <button id="download-btn" class="download-btn">💾 ফাইল ডাউনলোড করুন</button>
+        </div>
+    </div>
+  </div>
+
+  <script src="videos.js"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const YOUTUBE_API_KEYS = [
+            "AIzaSyBwpByVQ4gguHCpKlQGeFIF4bBAtBdZu4M",
+            "AIzaSyApHhsojw9ROjKPdNzNVc2K_8DEjSSHR8A",
+            "AIzaSyCV8dc0kI324m_rKYYDHk8MfRZB9XKki4U"
+        ];
+        let currentApiKeyIndex = 0;
+
+        const addChannelForm = document.getElementById("add-channel-form");
+        const channelsTableBody = document.querySelector("#channels-table tbody");
+        const singleVideoForm = document.getElementById("single-video-form");
+        const videoLinkInput = document.getElementById("video-link");
+        const videoTitleInput = document.getElementById("video-title");
+        const singleVideoSubmitBtn = document.getElementById("single-video-submit-btn");
+        const linkStatus = document.getElementById("link-status");
+        const updateAllChannelsBtn = document.getElementById("updateAllChannelsBtn");
+        const updateAllLoadingIndicator = document.getElementById("updateAllLoadingIndicator");
+        const updateAllResults = document.getElementById("updateAllResults");
+        const outputSection = document.getElementById("output-section");
+        const outputCode = document.getElementById("output-code");
+        const copyBtn = document.getElementById("copy-btn");
+        const downloadBtn = document.getElementById("download-btn");
+
+        let currentVideos = (typeof allVideosData !== 'undefined' && Array.isArray(allVideosData)) ? allVideosData : [];
+        let subscribedChannels = [];
+
+        const loadChannels = () => {
+            const storedChannels = localStorage.getItem('deenflixSubscribedChannels');
+            subscribedChannels = storedChannels ? JSON.parse(storedChannels) : [];
+        };
+        const saveChannels = () => {
+            localStorage.setItem('deenflixSubscribedChannels', JSON.stringify(subscribedChannels));
+        };
+
+        const renderChannelsTable = () => {
+            channelsTableBody.innerHTML = "";
+            if (subscribedChannels.length === 0) {
+                channelsTableBody.innerHTML = `<tr><td colspan="3" style="text-align:center;">কোনো চ্যানেল এখনো যোগ করা হয়নি।</td></tr>`;
+                return;
+            }
+            subscribedChannels.forEach(channel => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${channel.channelTitle}</td>
+                    <td>${channel.category}</td>
+                    <td><button class="delete-btn" data-channel-id="${channel.channelId}">ডিলিট</button></td>
+                `;
+                channelsTableBody.appendChild(row);
+            });
+        };
+
+        function displayGeneratedCode() {
+            currentVideos.sort((a, b) => new Date(b.publishedAt) - new Date(a.publishedAt));
+            const finalCode = `const allVideosData = ${JSON.stringify(currentVideos, null, 2)};`;
+            outputCode.value = finalCode;
+            outputSection.style.display = 'block';
+        }
+
+        function getYoutubeVideoId(url) {
+            try {
+                const urlObj = new URL(url);
+                if (urlObj.hostname.includes('youtube.com')) return urlObj.searchParams.get('v');
+                if (urlObj.hostname.includes('youtu.be') || urlObj.pathname.includes('/shorts/')) return urlObj.pathname.substring(urlObj.pathname.lastIndexOf('/') + 1).split('?')[0];
+            } catch (e) { console.error("অবৈধ URL:", e); }
+            return null;
+        }
+
+        function parseDuration(isoDuration) {
+            const matches = isoDuration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+            if (!matches) return 0;
+            const hours = parseInt(matches[1] || 0) * 3600;
+            const minutes = parseInt(matches[2] || 0) * 60;
+            const seconds = parseInt(matches[3] || 0);
+            return hours + minutes + seconds;
+        }
+
+        async function fetchWithRetry(baseUrl) {
+            for (let i = 0; i < YOUTUBE_API_KEYS.length; i++) {
+                const apiKey = YOUTUBE_API_KEYS[currentApiKeyIndex];
+                const url = `${baseUrl}&key=${apiKey}`;
+                try {
+                    const response = await fetch(url);
+                    if (response.ok) return await response.json();
+                    if (response.status === 403) {
+                        console.warn(`API কী #${currentApiKeyIndex + 1} ব্যর্থ হয়েছে।`);
+                        currentApiKeyIndex = (currentApiKeyIndex + 1) % YOUTUBE_API_KEYS.length;
+                    } else { throw new Error(`API Error (${response.status})`); }
+                } catch (error) {
+                    console.error("Fetch Error:", error);
+                    currentApiKeyIndex = (currentApiKeyIndex + 1) % YOUTUBE_API_KEYS.length;
+                }
+            }
+            throw new Error("আপনার সবগুলো ইউটিউব API কী ব্যর্থ হয়েছে।");
+        }
+        
+        addChannelForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('add-channel-btn');
+            const videoLink = document.getElementById('channel-video-link').value.trim();
+            const category = document.getElementById('new-channel-category').value;
+            if (!videoLink || !category) { alert("অনুগ্রহ করে ভিডিও লিংক এবং ক্যাটাগরি দিন।"); return; }
+            btn.disabled = true; btn.textContent = "প্রসেসিং...";
+            try {
+                const videoId = getYoutubeVideoId(videoLink);
+                if (!videoId) throw new Error("অবৈধ ইউটিউব লিংক।");
+                const data = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}`);
+                if (!data.items || data.items.length === 0) throw new Error("ভিডিও খুঁজে পাওয়া যায়নি।");
+                const { channelId, channelTitle } = data.items[0].snippet;
+                if (subscribedChannels.some(ch => ch.channelId === channelId)) {
+                    alert(`"${channelTitle}" চ্যানেলটি ইতিমধ্যে তালিকায় যুক্ত আছে।`);
+                } else {
+                    subscribedChannels.push({ channelId, channelTitle, category });
+                    saveChannels(); renderChannelsTable();
+                    alert(`"${channelTitle}" চ্যানেলটি সফলভাবে যুক্ত হয়েছে।`);
+                }
+                addChannelForm.reset();
+            } catch (error) {
+                alert(`একটি ত্রুটি ঘটেছে: ${error.message}`);
+            } finally {
+                btn.disabled = false; btn.textContent = "➕ চ্যানেল যোগ করুন";
+            }
+        });
+        
+        channelsTableBody.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-btn')) {
+                const channelIdToDelete = e.target.dataset.channelId;
+                if (confirm("আপনি কি সত্যিই এই চ্যানেলটি তালিকা থেকে মুছে ফেলতে চান?")) {
+                    subscribedChannels = subscribedChannels.filter(ch => ch.channelId !== channelIdToDelete);
+                    saveChannels(); renderChannelsTable();
+                }
+            }
+        });
+
+        videoLinkInput.addEventListener('blur', async () => {
+            const link = videoLinkInput.value.trim();
+            videoTitleInput.value = ""; linkStatus.textContent = "";
+            singleVideoSubmitBtn.disabled = true;
+            if (!link) return;
+            
+            const videoId = getYoutubeVideoId(link);
+            if (!videoId) {
+                linkStatus.textContent = "অবৈধ ইউটিউব লিংক।";
+                linkStatus.className = "link-status error";
+                return;
+            }
+            
+            if (currentVideos.some(v => getYoutubeVideoId(v.link) === videoId)) {
+                linkStatus.textContent = "এই ভিডিওটি ইতিমধ্যে তালিকায় যুক্ত আছে।";
+                linkStatus.className = "link-status error";
+                return;
+            }
+
+            linkStatus.textContent = "শিরোনাম আনা হচ্ছে..."; linkStatus.className = "link-status loading";
+            try {
+                const data = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}`);
+                if (data && data.items && data.items.length > 0) {
+                    videoTitleInput.value = data.items[0].snippet.title;
+                    linkStatus.textContent = "শিরোনাম সফলভাবে যুক্ত হয়েছে!";
+                    linkStatus.className = "link-status success";
+                    singleVideoSubmitBtn.disabled = false;
+                } else { throw new Error("এই লিংকে কোনো ভিডিও খুঁজে পাওয়া যায়নি।"); }
+            } catch (error) {
+                console.error("Title fetch error:", error);
+                linkStatus.textContent = "শিরোনাম আনা যায়নি।";
+                linkStatus.className = "link-status error";
+            }
+        });
+        
+        singleVideoForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('video-title').value.trim();
+            const link = document.getElementById('video-link').value.trim();
+            const category = document.getElementById('video-category').value;
+            const videoId = getYoutubeVideoId(link);
+
+            if (!title || !link || !category || !videoId) { alert('অনুগ্রহ করে সকল তথ্য পূরণ করুন।'); return; }
+            
+            singleVideoSubmitBtn.disabled = true;
+            const data = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoId}`);
+            const videoDetails = data.items[0].snippet;
+
+            const newVideo = { 
+                id: Date.now(), 
+                title, 
+                link, 
+                category, 
+                publishedAt: videoDetails.publishedAt, 
+                channel: videoDetails.channelTitle,
+                channelId: videoDetails.channelId, 
+                reactions: { barakallah: 0, subhanallah: 0, ameen: 0 } 
+            };
+            currentVideos.unshift(newVideo);
+            displayGeneratedCode();
+            singleVideoForm.reset();
+            linkStatus.textContent = "";
+            alert('ভিডিও সফলভাবে যোগ করা হয়েছে! নিচের বক্স থেকে কোড ডাউনলোড করুন।');
+        });
+
+        updateAllChannelsBtn.addEventListener("click", async () => {
+            if (subscribedChannels.length === 0) {
+                alert("কোনো চ্যানেল যোগ করা নেই। অনুগ্রহ করে প্রথমে চ্যানেল যোগ করুন।");
+                return;
+            }
+            if (!confirm("আপনি কি সেভ করা চ্যানেলগুলো থেকে নতুন ভিডিও আনার প্রক্রিয়া শুরু করতে চান?")) return;
+            
+            updateAllLoadingIndicator.style.display = 'block';
+            updateAllResults.style.display = 'block';
+            updateAllResults.innerHTML = `<ul><li>পুরনো ${currentVideos.length} টি ভিডিওর তালিকা লোড করা হচ্ছে...</li><li>মোট ${subscribedChannels.length}টি চ্যানেল পরীক্ষা করা হবে।</li></ul>`;
+            updateAllChannelsBtn.disabled = true;
+            outputSection.style.display = 'none';
+            let totalNewVideos = 0;
+            let totalNewShorts = 0;
+            const existingVideoIds = new Set(currentVideos.map(v => getYoutubeVideoId(v.link)).filter(id => id));
+
+            for (let i = 0; i < subscribedChannels.length; i++) {
+                const channel = subscribedChannels[i];
+                const { channelId, category, channelTitle } = channel;
+                updateAllResults.innerHTML += `<ul><li>(${i + 1}/${subscribedChannels.length}) "${channelTitle}" চ্যানেলটি পরীক্ষা করা হচ্ছে...</li></ul>`;
+                try {
+                    const channelData = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/channels?part=contentDetails&id=${channelId}`);
+                    const uploadsPlaylistId = channelData?.items?.[0]?.contentDetails?.relatedPlaylists?.uploads;
+                    if (!uploadsPlaylistId) { console.warn(`"${channelTitle}" চ্যানেলের আপলোড প্লে-লিস্ট পাওয়া যায়নি।`); continue; }
+                    
+                    const playlistItems = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&playlistId=${uploadsPlaylistId}&maxResults=50`);
+                    if (!playlistItems.items) continue;
+                    
+                    const videoIds = playlistItems.items.map(item => item.snippet.resourceId.videoId).filter(id => !existingVideoIds.has(id)).join(',');
+                    if (!videoIds) {
+                       updateAllResults.innerHTML += `<ul><li style="color: #555;">-> "${channelTitle}" চ্যানেলে কোনো নতুন ভিডিও নেই।</li></ul>`;
+                       continue;
+                    }
+
+                    const videosData = await fetchWithRetry(`https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet&id=${videoIds}`);
+                    let newVideosFromChannel = 0;
+                    let newShortsFromChannel = 0;
+
+                    videosData.items.forEach(item => {
+                        const duration = parseDuration(item.contentDetails.duration);
+                        let isSuitable = false;
+                        let link = '';
+
+                        if (duration <= 61) { // শর্টস হিসেবে গণ্য হবে
+                            isSuitable = true;
+                            link = `https://www.youtube.com/shorts/${item.id}`;
+                            newShortsFromChannel++;
+                        } else if (duration >= 120) { // সাধারণ ভিডিও হিসেবে গণ্য হবে
+                            isSuitable = true;
+                            link = `https://www.youtube.com/watch?v=${item.id}`;
+                            newVideosFromChannel++;
+                        }
+                        
+                        if (isSuitable) {
+                           currentVideos.unshift({ 
+                                id: Date.now() + Math.random(), 
+                                title: item.snippet.title, 
+                                link: link, 
+                                category: category, 
+                                publishedAt: item.snippet.publishedAt, 
+                                channel: item.snippet.channelTitle,
+                                channelId: item.snippet.channelId, 
+                                reactions: { barakallah: 0, subhanallah: 0, ameen: 0 } 
+                            });
+                        }
+                    });
+
+                    if (newVideosFromChannel > 0 || newShortsFromChannel > 0) {
+                        totalNewVideos += newVideosFromChannel;
+                        totalNewShorts += newShortsFromChannel;
+                        updateAllResults.innerHTML += `<ul><li style="color: green;">-> "${channelTitle}" থেকে ${newVideosFromChannel}টি নতুন ভিডিও এবং ${newShortsFromChannel}টি নতুন শর্টস পাওয়া গেছে।</li></ul>`;
+                    } else {
+                        updateAllResults.innerHTML += `<ul><li style="color: #555;">-> "${channelTitle}" চ্যানেলে কোনো নতুন উপযুক্ত ভিডিও বা শর্টস নেই।</li></ul>`;
+                    }
+
+                } catch (channelError) {
+                    console.error(`"${channelTitle}" চ্যানেল প্রসেস করার সময় ত্রুটি:`, channelError);
+                    updateAllResults.innerHTML += `<ul><li style="color: red;">-> "${channelTitle}" চ্যানেলটি প্রসেস করার সময় ত্রুটি।</li></ul>`;
+                }
+            }
+            updateAllResults.innerHTML += `<div class="summary">প্রক্রিয়া সম্পন্ন! মোট ${totalNewVideos}টি নতুন ভিডিও এবং ${totalNewShorts}টি নতুন শর্টস যুক্ত হয়েছে।</div>`;
+            displayGeneratedCode();
+            updateAllLoadingIndicator.style.display = 'none';
+            updateAllChannelsBtn.disabled = false;
+        });
+
+        copyBtn.addEventListener('click', () => {
+            outputCode.select();
+            document.execCommand('copy');
+            copyBtn.textContent = '✅ কপি হয়েছে!';
+            setTimeout(() => { copyBtn.textContent = '📝 কোড কপি করুন'; }, 2000);
+        });
+
+        downloadBtn.addEventListener('click', () => {
+            const blob = new Blob([outputCode.value], { type: 'text/javascript' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'videos.js';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        const initialize = () => { loadChannels(); renderChannelsTable(); };
+        initialize();
+    });
+  </script>
+
+</body>
+</html>
